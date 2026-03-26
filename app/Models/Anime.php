@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable([
     'mal_id',
@@ -43,5 +44,16 @@ class Anime extends Model
             'score' => 'decimal:2',
             'embedding' => 'array',
         ];
+    }
+
+    /**
+     * @return BelongsToMany<User, $this>
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->using(AnimeUser::class)
+            ->withPivot(['status', 'is_favorite', 'score', 'episodes_watched'])
+            ->withTimestamps();
     }
 }
