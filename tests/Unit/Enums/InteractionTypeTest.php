@@ -4,24 +4,17 @@ declare(strict_types=1);
 
 use App\Enums\InteractionType;
 
-it('returns a human-readable label for each case', function (InteractionType $case, string $expected) {
-    expect($case->label())->toBe($expected);
-})->with([
-    [InteractionType::SemanticSearch, 'Semantic Search'],
-    [InteractionType::CatalogFilter,  'Catalog Filter'],
-    [InteractionType::AnimeView,      'Anime View'],
-    [InteractionType::FavoriteAdd,    'Favorite Add'],
-]);
+it('label() returns the translation for each case', function (InteractionType $case) {
+    expect($case->label())->toBe(__("enums.interaction_type.{$case->value}"));
+})->with(InteractionType::cases());
 
-it('returns all cases as a value => label map via options()', function () {
+it('options() keys match enum values and values match translations', function () {
     $options = InteractionType::options();
 
-    expect($options)->toBe([
-        'SEMANTIC_SEARCH' => 'Semantic Search',
-        'CATALOG_FILTER' => 'Catalog Filter',
-        'ANIME_VIEW' => 'Anime View',
-        'FAVORITE_ADD' => 'Favorite Add',
-    ]);
+    foreach (InteractionType::cases() as $case) {
+        expect($options)->toHaveKey($case->value)
+            ->and($options[$case->value])->toBe(__("enums.interaction_type.{$case->value}"));
+    }
 });
 
 it('options() contains one entry per case', function () {

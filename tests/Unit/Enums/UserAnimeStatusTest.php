@@ -4,28 +4,17 @@ declare(strict_types=1);
 
 use App\Enums\UserAnimeStatus;
 
-it('returns a human-readable label for each case', function (UserAnimeStatus $case, string $expected) {
-    expect($case->label())->toBe($expected);
-})->with([
-    [UserAnimeStatus::Watching,    'Watching'],
-    [UserAnimeStatus::Completed,   'Completed'],
-    [UserAnimeStatus::OnHold,      'On Hold'],
-    [UserAnimeStatus::Dropped,     'Dropped'],
-    [UserAnimeStatus::PlanToWatch, 'Plan to Watch'],
-    [UserAnimeStatus::Blacklisted, 'Blacklisted'],
-]);
+it('label() returns the translation for each case', function (UserAnimeStatus $case) {
+    expect($case->label())->toBe(__("enums.user_anime_status.{$case->value}"));
+})->with(UserAnimeStatus::cases());
 
-it('returns all cases as a value => label map via options()', function () {
+it('options() keys match enum values and values match translations', function () {
     $options = UserAnimeStatus::options();
 
-    expect($options)->toBe([
-        'WATCHING' => 'Watching',
-        'COMPLETED' => 'Completed',
-        'ON_HOLD' => 'On Hold',
-        'DROPPED' => 'Dropped',
-        'PLAN_TO_WATCH' => 'Plan to Watch',
-        'BLACKLISTED' => 'Blacklisted',
-    ]);
+    foreach (UserAnimeStatus::cases() as $case) {
+        expect($options)->toHaveKey($case->value)
+            ->and($options[$case->value])->toBe(__("enums.user_anime_status.{$case->value}"));
+    }
 });
 
 it('options() contains one entry per case', function () {

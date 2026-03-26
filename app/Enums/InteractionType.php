@@ -16,12 +16,7 @@ enum InteractionType: string
      */
     public function label(): string
     {
-        return match ($this) {
-            self::SemanticSearch => 'Semantic Search',
-            self::CatalogFilter => 'Catalog Filter',
-            self::AnimeView => 'Anime View',
-            self::FavoriteAdd => 'Favorite Add',
-        };
+        return __("enums.interaction_type.{$this->value}");
     }
 
     /**

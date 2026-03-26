@@ -18,6 +18,9 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
+// Enum tests need the Laravel app booted (for __()) but not the database.
+pest()->extend(TestCase::class)->in('Unit/Enums');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

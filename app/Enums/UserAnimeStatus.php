@@ -18,14 +18,7 @@ enum UserAnimeStatus: string
      */
     public function label(): string
     {
-        return match ($this) {
-            self::Watching => 'Watching',
-            self::Completed => 'Completed',
-            self::OnHold => 'On Hold',
-            self::Dropped => 'Dropped',
-            self::PlanToWatch => 'Plan to Watch',
-            self::Blacklisted => 'Blacklisted',
-        };
+        return __("enums.user_anime_status.{$this->value}");
     }
 
     /**

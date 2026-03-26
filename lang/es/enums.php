@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+
+    'interaction_type' => [
+        'SEMANTIC_SEARCH' => 'Búsqueda Semántica',
+        'CATALOG_FILTER' => 'Filtro de Catálogo',
+        'ANIME_VIEW' => 'Vista de Anime',
+        'FAVORITE_ADD' => 'Agregar a Favoritos',
+    ],
+
+    'user_anime_status' => [
+        'WATCHING' => 'Viendo',
+        'COMPLETED' => 'Completado',
+        'ON_HOLD' => 'En Pausa',
+        'DROPPED' => 'Abandonado',
+        'PLAN_TO_WATCH' => 'Planeo Ver',
+        'BLACKLISTED' => 'Bloqueado',
+    ],
+
+];
