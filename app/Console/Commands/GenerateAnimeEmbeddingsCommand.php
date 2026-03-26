@@ -44,7 +44,7 @@ class GenerateAnimeEmbeddingsCommand extends Command
         /** @var list<GenerateAnimeEmbeddingsBatchJob> $jobs */
         $jobs = [];
 
-        $query->lazyById(1000)->chunk($chunkSize, function ($chunk) use (&$jobs): void {
+        $query->chunk($chunkSize, function ($chunk) use (&$jobs): void {
             $jobs[] = new GenerateAnimeEmbeddingsBatchJob(
                 $chunk->pluck('id')->all()
             );
