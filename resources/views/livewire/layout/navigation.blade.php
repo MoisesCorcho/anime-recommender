@@ -16,95 +16,189 @@ new class extends Component
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
-                </div>
+<nav x-data="{ open: false, dropdownOpen: false }"
+     class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md shadow-2xl shadow-black/20"
+     style="border-bottom: 1px solid rgba(65, 71, 91, 0.3);">
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
+    <div class="flex justify-between items-center px-6 sm:px-8 h-20 max-w-full mx-auto">
+
+        {{-- ===== LEFT: Brand + Nav Links ===== --}}
+        <div class="flex items-center gap-8 lg:gap-12">
+
+            {{-- Brand Logo --}}
+            <a href="{{ route('dashboard') }}" wire:navigate class="shrink-0">
+                <span class="text-xl sm:text-2xl font-black tracking-tighter text-white uppercase font-headline">
+                    Anime Recommender
+                </span>
+            </a>
+
+            {{-- Primary Nav Links (desktop) --}}
+            <div class="hidden md:flex gap-6 lg:gap-8 items-center">
+                <a href="{{ route('dashboard') }}"
+                   wire:navigate
+                   class="font-headline text-sm font-medium tracking-tight transition-colors duration-200
+                          {{ request()->routeIs('dashboard') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-slate-200' }}">
+                    Discover
+                </a>
+                @if (Route::has('directory'))
+                <a href="{{ route('directory') }}"
+                   wire:navigate
+                   class="font-headline text-sm font-medium tracking-tight transition-colors duration-200
+                          {{ request()->routeIs('directory') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-slate-200' }}">
+                    Directory
+                </a>
+                @else
+                <a href="#"
+                   class="font-headline text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 transition-colors duration-200">
+                    Directory
+                </a>
+                @endif
+                <a href="#"
+                   class="font-headline text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 transition-colors duration-200">
+                    My List
+                </a>
             </div>
+        </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-hidden transition ease-in-out duration-150">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+        {{-- ===== RIGHT: Actions + User ===== --}}
+        <div class="flex items-center gap-3 sm:gap-5">
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+            {{-- Search Button --}}
+            <button class="hidden sm:flex p-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300 text-slate-400 hover:text-slate-200">
+                <span class="material-symbols-outlined text-[22px]">search</span>
+            </button>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
+            {{-- Notifications Button --}}
+            <button class="hidden sm:flex p-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300 text-slate-400 hover:text-slate-200">
+                <span class="material-symbols-outlined text-[22px]">notifications</span>
+            </button>
 
-                        <!-- Authentication -->
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </button>
-                    </x-slot>
-                </x-dropdown>
-            </div>
+            {{-- User Avatar Dropdown (Desktop) --}}
+            <div class="hidden sm:block relative"
+                 x-data="{{ json_encode(['name' => auth()->user()->name, 'email' => auth()->user()->email]) }}"
+                 x-on:profile-updated.window="name = $event.detail.name"
+                 @click.away="dropdownOpen = false">
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-hidden focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                <button @click="dropdownOpen = !dropdownOpen"
+                        class="flex items-center gap-2.5 group">
+                    {{-- Avatar circle with initials --}}
+                    <div class="w-9 h-9 rounded-full ring-2 ring-indigo-500/40 bg-indigo-600 flex items-center justify-center overflow-hidden hover:ring-indigo-400 transition-all duration-200">
+                        <span class="text-xs font-bold text-white uppercase font-headline"
+                              x-text="name.charAt(0)"></span>
+                    </div>
+                    <span class="text-sm text-slate-300 font-medium font-headline hidden lg:block"
+                          x-text="name"></span>
+                    <span class="material-symbols-outlined text-[16px] text-slate-500 transition-transform duration-200"
+                          :class="{ 'rotate-180': dropdownOpen }">expand_more</span>
                 </button>
+
+                {{-- Dropdown Menu --}}
+                <div x-show="dropdownOpen"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute right-0 mt-3 w-52 rounded-xl overflow-hidden shadow-2xl shadow-black/50 glass-panel"
+                     style="background: rgba(17, 25, 46, 0.95); border: 1px solid rgba(65, 71, 91, 0.5); top: 100%;"
+                     @click="dropdownOpen = false">
+
+                    {{-- User Info Header --}}
+                    <div class="px-4 py-3 border-b" style="border-color: rgba(65, 71, 91, 0.4);">
+                        <p class="text-xs text-slate-500 font-body">Signed in as</p>
+                        <p class="text-sm font-semibold text-white font-headline truncate mt-0.5" x-text="name"></p>
+                        <p class="text-xs text-slate-400 truncate" x-text="email"></p>
+                    </div>
+
+                    {{-- Menu Items --}}
+                    <div class="py-1.5">
+                        <a href="{{ route('profile') }}"
+                           wire:navigate
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors font-body">
+                            <span class="material-symbols-outlined text-[18px] text-slate-500">manage_accounts</span>
+                            Profile Settings
+                        </a>
+                        <div style="height: 1px; background: rgba(65, 71, 91, 0.4); margin: 4px 16px;"></div>
+                        <button wire:click="logout"
+                                class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-colors font-body">
+                            <span class="material-symbols-outlined text-[18px]">logout</span>
+                            Log Out
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {{-- Mobile Hamburger --}}
+            <button @click="open = !open"
+                    class="md:hidden flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200">
+                <span class="material-symbols-outlined" x-show="!open">menu</span>
+                <span class="material-symbols-outlined" x-show="open" x-cloak>close</span>
+            </button>
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+    {{-- ===== MOBILE MENU ===== --}}
+    <div x-show="open"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         style="border-top: 1px solid rgba(65, 71, 91, 0.3); background: rgba(7, 13, 31, 0.98);"
+         class="md:hidden glass-panel">
+
+        {{-- Mobile Nav Links --}}
+        <div class="px-6 py-4 space-y-1">
+            <a href="{{ route('dashboard') }}"
+               wire:navigate
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium font-headline transition-colors
+                      {{ request()->routeIs('dashboard') ? 'text-white bg-indigo-500/15 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                <span class="material-symbols-outlined text-[18px]">explore</span>
+                Discover
+            </a>
+            <a href="#"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-headline">
+                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                Directory
+            </a>
+            <a href="#"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-headline">
+                <span class="material-symbols-outlined text-[18px]">bookmarks</span>
+                My List
+            </a>
         </div>
 
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800 dark:text-gray-200" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
+        {{-- Mobile User Section --}}
+        <div style="border-top: 1px solid rgba(65, 71, 91, 0.3);"
+             class="px-6 py-4"
+             x-data="{{ json_encode(['name' => auth()->user()->name, 'email' => auth()->user()->email]) }}"
+             x-on:profile-updated.window="name = $event.detail.name">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full ring-2 ring-indigo-500/40 bg-indigo-600 flex items-center justify-center">
+                    <span class="text-xs font-bold text-white uppercase font-headline" x-text="name.charAt(0)"></span>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-white font-headline" x-text="name"></p>
+                    <p class="text-xs text-slate-400" x-text="email"></p>
+                </div>
             </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
+            <div class="space-y-1">
+                <a href="{{ route('profile') }}"
+                   wire:navigate
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-body">
+                    <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+                    Profile Settings
+                </a>
+                <button wire:click="logout"
+                        class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-colors font-body">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    Log Out
                 </button>
             </div>
         </div>
     </div>
 </nav>
+
