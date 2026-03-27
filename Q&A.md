@@ -327,3 +327,74 @@ Existen dos formas de manejar una penalización en sistemas de recomendación se
 Archivar los filtros aplicados en el log (`user_interactions`) es inmensamente valioso para la **Analítica del Negocio** (saber de qué año pide más el público, armar métricas, dashboards). Pero si modificás la estructura del ADN vectorial del usuario basándote solo en lo que "buscó un martes por la tarde", rompes el sistema de recomendaciones a largo plazo.
 
 Si un usuario busca algo muy raro (ej. "Hentai") por pura curiosidad morbosa o una broma con amigos en el navegador, y tu sistema absorbe ciegamente esas dimensiones a su perfil por el simple acto de usar el buscador, le arruinarás el catálogo de su Home por meses. El vector de identidad se blinda; solo se entra a él confirmando el interés mediante interacciones directas con el contenido (Clic Prolongado, Rating, Viendo, o Favorito).
+
+---
+
+## 24. Patrón Action Class
+
+### ¿Las clases dentro de `app/Actions/` son una feature de Laravel o un patrón de arquitectura?
+
+Son un **patrón de arquitectura**, no una feature de Laravel. No existe `artisan make:action`. La comunidad Laravel adoptó masivamente el patrón de **Single Action Classes**, que viene del Command Pattern del diseño de software. Se crean con `artisan make:class Actions/NombreAction` o simplemente como archivos PHP planos — no hay magia de framework adentro.
+
+### ¿Qué problema resuelven?
+
+El enemigo es el **Fat Controller** y el **Fat Model**. Sin Actions, la lógica de negocio termina acumulada en controladores que mezclan validación, reglas de dominio y persistencia en decenas de líneas. El resultado es código que no se puede testear en aislamiento y no se puede reutilizar desde otro punto de entrada.
+
+### ¿Un Action es básicamente un método privado de un Service extraído a su propia clase?
+
+Exactamente. Un Action **es lo que escribirías como método privado en un Service, pero promovido a clase propia**. La diferencia crítica es lo que ganás al extraerlo:
+
+- **Un método privado** queda atrapado en su clase: para testearlo tenés que pasar por el método público que lo llama, no podés instanciarlo en aislamiento, y si otro Service necesita la misma lógica la reescribís.
+- **Un Action** es una clase pública: inyectable vía el container de Laravel, testeable directamente, reutilizable desde cualquier punto de entrada (Controller, Job, Command de Artisan, otro Service).
+
+```php
+// ❌ Lógica atrapada — no testeable en aislamiento
+class CreditService
+{
+    public function deductForSemanticSearch(User $user): void
+    {
+        $this->checkBalance($user);   // método privado
+        $this->deductCredit($user);   // método privado
+    }
+
+    private function checkBalance(User $user): void { ... }
+    private function deductCredit(User $user): void { ... }
+}
+
+// ✅ Lógica extraída — testeable y reutilizable
+class CheckCreditBalanceAction
+{
+    public function execute(User $user): void
+    {
+        if ($user->credit_balance < 1) {
+            throw new InsufficientCreditsException();
+        }
+    }
+}
+```
+
+Con el Action extraído, el test es directo:
+
+```php
+it('throws when balance is zero', function () {
+    $user = User::factory()->create(['credit_balance' => 0]);
+
+    expect(fn() => (new CheckCreditBalanceAction())->execute($user))
+        ->toThrow(InsufficientCreditsException::class);
+});
+```
+
+### ¿Cuándo un método privado debe quedarse privado y cuándo debe convertirse en Action?
+
+Un método privado está bien si es trivial y específico de esa clase. Merece ser un Action cuando tiene **lógica de negocio real**, un **nombre descriptivo con semántica clara**, y **potencial de ser llamado desde más de un lugar**. La regla práctica: si el método tiene nombre de operación de negocio (`deductCredit`, `checkBalance`, `initializeCredits`), es candidato a Action.
+
+### ¿Cuál es la diferencia entre un Action y un Service?
+
+| | Action | Service |
+|---|---|---|
+| **Responsabilidad** | Una operación atómica específica | Orquestación de varias operaciones |
+| **Estado** | Sin estado (stateless) | Tiene dependencias inyectadas |
+| **Ejemplo en este sistema** | `DeductCreditAction` | `CreditService` |
+| **Analogía** | Un tornillo | El destornillador |
+
+Un Service usa varios Actions. Un Action no usa otros Actions — si eso empieza a pasar, la lógica sube al Service.

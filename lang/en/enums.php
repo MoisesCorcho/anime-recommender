@@ -20,4 +20,21 @@ return [
         'BLACKLISTED' => 'Blacklisted',
     ],
 
+    'credit_transaction_type' => [
+        'DEBIT' => 'Debit',
+        'CREDIT' => 'Credit',
+    ],
+
+    'credit_transaction_reason' => [
+        'REGISTRATION_BONUS' => 'Registration Bonus',
+        'SEMANTIC_SEARCH' => 'Semantic Search',
+        'SUBSCRIPTION_RENEWAL' => 'Subscription Renewal',
+        'PACK_PURCHASE' => 'Pack Purchase',
+    ],
+
+    'subscription_tier' => [
+        'FREE' => 'Free',
+        'PRO' => 'Pro',
+    ],
+
 ];
