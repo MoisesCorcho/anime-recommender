@@ -15,6 +15,7 @@ interface PaymentGatewayInterface
         string $priceId,
         string $successUrl,
         string $cancelUrl,
+        string $mode = 'subscription',
     ): CheckoutSessionDTO;
 
     public function getActiveSubscription(User $user): ?SubscriptionDataDTO;

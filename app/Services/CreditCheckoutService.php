@@ -28,12 +28,14 @@ final class CreditCheckoutService
     public function createCheckoutSession(User $user, string $plan): CheckoutSessionDTO
     {
         $priceId = config("credits.prices.{$plan}", $plan);
+        $mode = $plan === 'pro' ? 'subscription' : 'payment';
 
         return $this->gateway->createCheckoutSession(
             user: $user,
             priceId: $priceId,
             successUrl: route('checkout.success'),
             cancelUrl: route('checkout.cancel'),
+            mode: $mode,
         );
     }
 

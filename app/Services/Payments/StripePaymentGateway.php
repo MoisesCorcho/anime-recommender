@@ -24,9 +24,10 @@ final class StripePaymentGateway implements PaymentGatewayInterface
         string $priceId,
         string $successUrl,
         string $cancelUrl,
+        string $mode = 'subscription',
     ): CheckoutSessionDTO {
         $checkout = Checkout::create($user, [
-            'mode' => 'subscription',
+            'mode' => $mode,
             'line_items' => [
                 ['price' => $priceId, 'quantity' => 1],
             ],
