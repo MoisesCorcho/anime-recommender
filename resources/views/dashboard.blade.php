@@ -21,6 +21,17 @@
                                 💳 Testear Stripe Checkout (Plan Pro)
                             </button>
                         </form>
+
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            @foreach (['pack_100' => '100 créditos', 'pack_500' => '500 créditos', 'pack_1000' => '1000 créditos'] as $pack => $label)
+                                <form action="{{ route('checkout.create', $pack) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded shadow-md transition-colors">
+                                        🪙 Comprar {{ $label }}
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
