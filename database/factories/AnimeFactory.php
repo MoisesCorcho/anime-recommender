@@ -39,4 +39,20 @@ class AnimeFactory extends Factory
     {
         return $this->state(['embedding' => null]);
     }
+
+    /**
+     * State for an anime that already has a 1536-dim embedding stored.
+     *
+     * Uses random unit-range floats so pgvector cosine distance is well-defined.
+     * Intended for feature tests that need animes eligible for semantic search.
+     */
+    public function withEmbedding(): static
+    {
+        return $this->state([
+            'embedding' => array_map(
+                fn (): float => fake()->randomFloat(6, -1, 1),
+                range(0, 1535),
+            ),
+        ]);
+    }
 }
