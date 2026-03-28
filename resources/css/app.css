@@ -163,18 +163,52 @@
     font-family: var(--font-body);
   }
 
-  /* 3D Hero side-card transforms */
-  .hero-card-left {
-    transform: rotateY(12deg) translateX(-20px) scale(0.92);
-    transition: all 0.5s ease;
-  }
-  .hero-card-right {
-    transform: rotateY(-12deg) translateX(20px) scale(0.92);
-    transition: all 0.5s ease;
-  }
+  /* Cover Flow — Hero Card States */
   .hero-card-center {
-    transform: scale(1.06);
-    transition: all 0.7s ease;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 340px; height: 480px;
+    z-index: 20; opacity: 1;
+    box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.85);
+    outline: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .hero-card-prev {
+    display: none;
+    left: 15%; top: 50%;
+    transform: translate(-50%, -50%) rotateY(12deg);
+    width: 220px; height: 340px;
+    z-index: 10; opacity: 0.4;
+    cursor: pointer;
+  }
+
+  .hero-card-next {
+    display: none;
+    left: 85%; top: 50%;
+    transform: translate(-50%, -50%) rotateY(-12deg);
+    width: 220px; height: 340px;
+    z-index: 10; opacity: 0.4;
+    cursor: pointer;
+  }
+
+  .hero-card-hidden {
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(0.75);
+    width: 220px; height: 340px;
+    z-index: 0; opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (min-width: 640px) {
+    .hero-card-prev,
+    .hero-card-next { display: block; }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-card-center { width: 420px; height: 580px; }
+    .hero-card-prev   { left: 22%; width: 280px; height: 420px; }
+    .hero-card-next   { left: 78%; width: 280px; height: 420px; }
+    .hero-card-hidden { width: 280px; height: 420px; }
   }
 
   /* Section header accent border */
