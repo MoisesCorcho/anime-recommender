@@ -19,12 +19,16 @@ use Laravel\Cashier\Checkout;
  */
 final class StripePaymentGateway implements PaymentGatewayInterface
 {
+    /**
+     * @param  array<string, string>  $metadata
+     */
     public function createCheckoutSession(
         User $user,
         string $priceId,
         string $successUrl,
         string $cancelUrl,
         string $mode = 'subscription',
+        array $metadata = [],
     ): CheckoutSessionDTO {
         $checkout = Checkout::create($user, [
             'mode' => $mode,
@@ -33,6 +37,7 @@ final class StripePaymentGateway implements PaymentGatewayInterface
             ],
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
+            'metadata' => $metadata,
         ]);
 
         $session = $checkout->asStripeCheckoutSession();

@@ -36,6 +36,7 @@ final class CreditCheckoutService
             successUrl: route('checkout.success'),
             cancelUrl: route('checkout.cancel'),
             mode: $mode,
+            metadata: ['plan' => $plan],
         );
     }
 
@@ -70,7 +71,7 @@ final class CreditCheckoutService
         $sessionData = $dto->data['object'] ?? [];
         $customerId = $sessionData['customer'] ?? null;
         $mode = $sessionData['mode'] ?? null;
-        $priceId = $sessionData['line_items']['data'][0]['price']['id'] ?? null;
+        $plan = $sessionData['metadata']['plan'] ?? null;
 
         if ($customerId === null) {
             return;
@@ -91,13 +92,12 @@ final class CreditCheckoutService
                 reason: CreditTransactionReason::SubscriptionRenewal,
                 referenceId: $sessionData['payment_intent'] ?? null,
             ));
-        } elseif ($mode === 'payment' && $priceId !== null) {
-            $packPrices = array_diff_key((array) config('credits.prices'), ['pro' => null]);
-            $planKey = array_search($priceId, $packPrices, strict: true);
+        } elseif ($mode === 'payment' && $plan !== null) {
+            $packCredits = config("credits.pack_credits.{$plan}");
 
-            if ($planKey !== false) {
+            if ($packCredits !== null) {
                 $this->credits->topUp($user, new CreditTopUpDTO(
-                    amount: (int) config("credits.pack_credits.{$planKey}"),
+                    amount: (int) $packCredits,
                     reason: CreditTransactionReason::PackPurchase,
                     referenceId: $sessionData['payment_intent'] ?? null,
                 ));
