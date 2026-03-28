@@ -12,19 +12,19 @@ use Illuminate\View\View;
 
 class CheckoutController extends Controller
 {
-    private const VALID_PLANS = ['pro', 'pack_100', 'pack_500', 'pack_1000'];
-
     public function __construct(
         private readonly CreditCheckoutService $checkout,
     ) {}
 
     public function create(Request $request, string $plan): RedirectResponse
     {
+        $validPlans = array_keys((array) config('credits.prices'));
+
         $request->validate([
-            'plan' => 'in:pro,pack_100,pack_500,pack_1000',
+            'plan' => 'in:'.implode(',', $validPlans),
         ]);
 
-        if (! in_array($plan, self::VALID_PLANS, strict: true)) {
+        if (! in_array($plan, $validPlans, strict: true)) {
             abort(422, 'Invalid plan.');
         }
 
