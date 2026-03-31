@@ -71,8 +71,11 @@
                         </p>
 
                         <div class="flex gap-3 pt-1 flex-wrap">
-                            <button class="primary-gradient text-on-primary font-headline font-bold px-6 py-2.5 rounded-full flex items-center gap-2 transition-all duration-200 active:scale-95 hover:shadow-lg hover:shadow-primary/20 text-sm">
-                                <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+                            <button
+                                wire:click.stop="$dispatch('open-anime-modal', { id: '{{ $anime->id }}' })"
+                                class="primary-gradient text-on-primary font-headline font-bold px-6 py-2.5 rounded-full flex items-center gap-2 transition-all duration-200 active:scale-95 hover:shadow-lg hover:shadow-primary/20 text-sm"
+                            >
+                                <span class="material-symbols-outlined material-filled text-[18px]">play_arrow</span>
                                 Where To Watch
                             </button>
                             <button class="bg-white/10 backdrop-blur-md text-white border border-white/20 font-headline font-bold px-5 py-2.5 rounded-full flex items-center gap-2 transition-all duration-200 hover:bg-white/20 text-sm">

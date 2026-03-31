@@ -216,4 +216,13 @@
     border-left: 4px solid var(--color-primary);
     padding-left: 1rem;
   }
+
+  /* Material Symbols — FILL variant */
+  .material-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  /* Hide scrollbar utility (used by anime modal content panel) */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }

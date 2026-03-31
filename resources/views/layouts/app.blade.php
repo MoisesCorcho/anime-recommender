@@ -36,5 +36,7 @@
         <main>
             {{ $slot }}
         </main>
+
+        <livewire:components.anime-modal />
     </body>
 </html>

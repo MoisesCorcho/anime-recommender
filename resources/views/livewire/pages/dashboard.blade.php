@@ -28,6 +28,7 @@ with(fn () => [
                             :title="$anime->title"
                             :score="$anime->score"
                             :image="$anime->image_url"
+                            :animeId="$anime->id"
                         />
                     @endforeach
                 </div>
@@ -42,6 +43,7 @@ with(fn () => [
                             :title="$anime->title"
                             :score="$anime->score"
                             :image="$anime->image_url"
+                            :animeId="$anime->id"
                         />
                     @endforeach
                 </div>
