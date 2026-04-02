@@ -30,7 +30,7 @@ on(['open-anime-modal' => function (string $id) {
 >
     {{-- Glass Backdrop --}}
     <div
-        class="absolute inset-0 bg-black/85 backdrop-blur-md"
+        class="absolute inset-0 bg-black/40 backdrop-blur-md"
         @click="show = false"
     ></div>
 
@@ -47,7 +47,7 @@ on(['open-anime-modal' => function (string $id) {
         {{-- Close Button (desktop only) --}}
         <button
             @click="show = false"
-            class="hidden md:flex absolute top-5 right-5 z-50 p-2 bg-surface-container-highest/60 backdrop-blur-sm rounded-full text-on-surface hover:bg-surface-container-highest transition-colors"
+            class="hidden md:flex absolute top-5 right-5 z-50 p-2 bg-surface-container-highest/60 backdrop-blur-sm rounded-full text-on-surface hover:bg-surface-container-highest transition-colors cursor-pointer"
             aria-label="Cerrar modal"
             id="anime-modal-close-btn"
         >

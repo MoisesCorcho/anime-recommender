@@ -22,7 +22,7 @@ new class extends Component
 
     <div class="flex justify-between items-center px-6 sm:px-8 h-20 max-w-full mx-auto">
 
-        {{-- ===== LEFT: Brand + Nav Links ===== --}}
+        {{-- LEFT: Brand + Nav Links --}}
         <div class="flex items-center gap-8 lg:gap-12">
 
             {{-- Brand Logo --}}
@@ -60,11 +60,11 @@ new class extends Component
             </div>
         </div>
 
-        {{-- ===== RIGHT: Actions + User ===== --}}
+        {{-- RIGHT: Actions + User --}}
         <div class="flex items-center gap-3 sm:gap-5">
 
             {{-- Search Button --}}
-            <button class="hidden sm:flex p-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300 text-slate-400 hover:text-slate-200">
+            <button @click="$dispatch('open-search-modal')" class="flex p-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300 text-slate-400 hover:text-slate-200">
                 <span class="material-symbols-outlined text-[22px]">search</span>
             </button>
 
@@ -138,7 +138,7 @@ new class extends Component
         </div>
     </div>
 
-    {{-- ===== MOBILE MENU ===== --}}
+    {{-- MOBILE MENU --}}
     <div x-show="open"
          x-cloak
          x-transition:enter="transition ease-out duration-200"
@@ -197,7 +197,6 @@ new class extends Component
                     <span class="material-symbols-outlined text-[18px]">logout</span>
                     Log Out
                 </button>
-            </div>
         </div>
     </div>
 </nav>

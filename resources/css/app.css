@@ -5,9 +5,9 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
-/* ======================================================
+/*
    Anime Recommender — Design System Tokens (Tailwind v4)
-   ====================================================== */
+*/
 @theme {
   /* Typography */
   --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
@@ -88,9 +88,9 @@
   --radius-full: 9999px;
 }
 
-/* ================================================
+/*
    Global Base Styles
-   ================================================ */
+*/
 @layer base {
   *,
   ::after,
@@ -112,9 +112,9 @@
   }
 }
 
-/* ================================================
+/*
    Anime Recommender — Custom Utility Classes
-   ================================================ */
+*/
 @layer utilities {
   /* 3D Hero Perspective */
   .hero-perspective {
