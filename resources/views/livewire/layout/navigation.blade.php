@@ -159,11 +159,21 @@ new class extends Component
                 <span class="material-symbols-outlined text-[18px]">explore</span>
                 Discover
             </a>
+            @if (Route::has('directory'))
+            <a href="{{ route('directory') }}"
+               wire:navigate
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors font-headline
+                      {{ request()->routeIs('directory') ? 'text-white bg-indigo-500/15 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                Directory
+            </a>
+            @else
             <a href="#"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-headline">
                 <span class="material-symbols-outlined text-[18px]">grid_view</span>
                 Directory
             </a>
+            @endif
             <a href="#"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-headline">
                 <span class="material-symbols-outlined text-[18px]">bookmarks</span>
