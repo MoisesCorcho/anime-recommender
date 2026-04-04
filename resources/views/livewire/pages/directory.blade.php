@@ -16,6 +16,13 @@ state([
     'sort'   => 'a-z'
 ])->url(); // Maintain URL state so links can be shared
 
+$clearFilters = function () {
+    $this->search = '';
+    $this->genre = 'all';
+    $this->year = 'all';
+    $this->type = 'all';
+};
+
 $availableYears = computed(function () {
     return Cache::remember('directory_anime_years', 86400, function () {
         return Anime::select('released_year')
@@ -68,7 +75,7 @@ $animes = computed(function () {
     if ($this->year !== 'all') {
         $query->where('released_year', $this->year);
     }
-    
+
     if ($this->type !== 'all') {
         $query->where('type', $this->type);
     }
@@ -96,14 +103,14 @@ $animes = computed(function () {
         </header>
 
         <!-- Filtering Utility -->
-        <section class="mb-12 md:mb-16 bg-surface-container-low p-5 md:p-6 rounded-2xl flex flex-wrap items-end gap-4 md:gap-6 shadow-sm border border-outline-variant/10">
-            <div class="flex-1 min-w-[200px] w-full">
+        <section class="mb-12 md:mb-16 bg-surface-container-low p-5 md:p-6 rounded-2xl grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-4 md:gap-6 shadow-sm border border-outline-variant/10">
+            <div class="col-span-2 sm:flex-1 min-w-[200px] w-full">
                 <label class="block text-label text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Filter by name</label>
                 <div class="relative">
                     <input wire:model.live.debounce.300ms="search" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-surface-variant focus:ring-2 focus:ring-primary transition-all font-medium text-sm md:text-base shadow-inner" placeholder="Type title..." type="text"/>
                 </div>
             </div>
-            
+
             <div class="w-full sm:w-auto sm:flex-1 md:flex-none md:w-44">
                 <label class="block text-label text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Type</label>
                 <select wire:model.live="type" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary transition-all cursor-pointer text-sm shadow-inner font-medium">
@@ -160,16 +167,16 @@ $animes = computed(function () {
                 @foreach($this->animes as $anime)
                 <div wire:click="$dispatch('open-anime-modal', '{{ $anime->id }}')" class="group relative cursor-pointer" wire:key="anime-{{ $anime->id }}">
                     <div class="aspect-[2/3] w-full rounded-2xl overflow-hidden bg-surface-container-high transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] group-active:scale-95 border border-transparent group-hover:border-outline-variant/20">
-                        <img 
-                            alt="{{ $anime->title }}" 
-                            class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110" 
-                            src="{{ $anime->image_url }}" 
+                        <img
+                            alt="{{ $anime->title }}"
+                            class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                            src="{{ $anime->image_url }}"
                             onerror="this.style.background='linear-gradient(135deg,#1c253e,#0c1326)';this.removeAttribute('src')"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-5">
-                            
+
                             <span class="text-tertiary text-[9px] md:text-[10px] font-bold tracking-[0.2em] uppercase mb-1 drop-shadow-md">
-                                {{ $anime->type ?? 'TV' }} 
+                                {{ $anime->type ?? 'TV' }}
                                 @if(is_string($anime->genres))
                                     @php $ags = json_decode($anime->genres, true); @endphp
                                     @if(is_array($ags) && count($ags) > 0) • {{ $ags[0] }} @endif
@@ -177,7 +184,7 @@ $animes = computed(function () {
                                     • {{ $anime->genres[0] }}
                                 @endif
                             </span>
-                            
+
                             <h3 class="font-headline text-base md:text-lg font-bold leading-tight text-white drop-shadow-lg">{{ $anime->title }}</h3>
                         </div>
                     </div>
@@ -185,7 +192,7 @@ $animes = computed(function () {
                     <div class="mt-3 md:mt-4 group-hover:opacity-0 transition-opacity duration-200 px-1">
                         <h4 class="font-headline text-sm font-bold text-white truncate" title="{{ $anime->title }}">{{ $anime->title }}</h4>
                         <p class="text-on-surface-variant text-[11px] md:text-xs mt-1 font-medium">
-                            {{ $anime->released_year ?: 'N/A' }} 
+                            {{ $anime->released_year ?: 'N/A' }}
                             @if($anime->episodes) • {{ $anime->episodes }} Eps @endif
                         </p>
                     </div>
@@ -203,7 +210,7 @@ $animes = computed(function () {
                 <span class="material-symbols-outlined text-[64px] text-primary mb-6">travel_explore</span>
                 <p class="text-white font-headline font-semibold text-2xl">No anime matches your filters</p>
                 <p class="text-sm text-on-surface-variant mt-2 max-w-md mx-auto">Try trying a different spelling, adjusting the year, or exploring other categories.</p>
-                <button wire:click="$set('search', ''); $set('genre', 'all'); $set('type', 'all'); $set('year', 'all')" class="mt-8 px-8 py-3 rounded-xl bg-surface-variant hover:bg-surface-container-highest transition-colors text-white font-bold text-sm tracking-wide border border-outline-variant/20 shadow-lg cursor-pointer">
+                <button wire:click="clearFilters" class="mt-8 px-8 py-3 rounded-xl bg-surface-variant hover:bg-surface-container-highest transition-colors text-white font-bold text-sm tracking-wide border border-outline-variant/20 shadow-lg cursor-pointer">
                     Clear Filters
                 </button>
             </div>
