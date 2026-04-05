@@ -100,7 +100,7 @@ $selectAnime = function ($id, $title) {
 
         <!-- Search Input Area -->
         <div class="p-6 border-b border-outline-variant/10 shrink-0 relative z-10 flex flex-col md:flex-row items-center gap-4">
-            <div class="w-full flex-grow flex items-center gap-4 bg-surface-container-lowest rounded-2xl px-5 py-4 group focus-within:ring-1 ring-primary/50 transition-all shadow-inner">
+            <div class="w-full flex-grow flex items-center gap-4 bg-surface-container-lowest rounded-2xl px-5 py-4 group focus-within:ring-2 ring-primary transition-all shadow-inner">
                 <span class="material-symbols-outlined text-primary text-[24px]">search</span>
                 <input
                     wire:model.live.debounce.300ms="search"

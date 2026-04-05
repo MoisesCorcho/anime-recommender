@@ -16,6 +16,10 @@ Volt::route('directory', 'pages.directory')
     ->middleware(['auth', 'verified'])
     ->name('directory');
 
+Volt::route('my-lists', 'pages.my-lists')
+    ->middleware(['auth', 'verified'])
+    ->name('my-lists');
+
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');

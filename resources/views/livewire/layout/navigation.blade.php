@@ -53,10 +53,14 @@ new class extends Component
                     Directory
                 </a>
                 @endif
-                <a href="#"
-                   class="font-headline text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 transition-colors duration-200">
-                    My List
+                @if (Route::has('my-lists'))
+                <a href="{{ route('my-lists') }}"
+                   wire:navigate
+                   class="font-headline text-sm font-medium tracking-tight transition-colors duration-200
+                          {{ request()->routeIs('my-lists') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-slate-200' }}">
+                    My Lists
                 </a>
+                @endif
             </div>
         </div>
 
@@ -174,11 +178,15 @@ new class extends Component
                 Directory
             </a>
             @endif
-            <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-headline">
+            @if (Route::has('my-lists'))
+            <a href="{{ route('my-lists') }}"
+               wire:navigate
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors font-headline
+                      {{ request()->routeIs('my-lists') ? 'text-white bg-indigo-500/15 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                 <span class="material-symbols-outlined text-[18px]">bookmarks</span>
                 My List
             </a>
+            @endif
         </div>
 
         {{-- Mobile User Section --}}

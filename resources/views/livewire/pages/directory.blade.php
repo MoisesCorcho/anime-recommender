@@ -107,7 +107,7 @@ $animes = computed(function () {
             <div class="col-span-2 sm:flex-1 min-w-[200px] w-full">
                 <label class="block text-label text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Filter by name</label>
                 <div class="relative">
-                    <input wire:model.live.debounce.300ms="search" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-surface-variant focus:ring-2 focus:ring-primary transition-all font-medium text-sm md:text-base shadow-inner" placeholder="Type title..." type="text"/>
+                    <input wire:model.live.debounce.300ms="search" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-medium text-sm md:text-base shadow-inner" placeholder="Type title..." type="text"/>
                 </div>
             </div>
 
