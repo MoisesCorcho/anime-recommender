@@ -225,4 +225,45 @@
   /* Hide scrollbar utility (used by anime modal content panel) */
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Animated gradient background */
+  @keyframes auth-gradient-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .auth-bg {
+    background: linear-gradient(
+      135deg,
+      #070d1f 0%,
+      #11192e 20%,
+      #1a1040 40%,
+      #0d1535 60%,
+      #100a2e 80%,
+      #070d1f 100%
+    );
+    background-size: 300% 300%;
+    animation: auth-gradient-shift 12s ease infinite;
+  }
+
+  /* Decorative radial orbs */
+  .auth-orb-primary {
+    background: radial-gradient(ellipse at center, rgba(159, 167, 255, 0.18) 0%, transparent 65%);
+  }
+
+  .auth-orb-secondary {
+    background: radial-gradient(ellipse at center, rgba(255, 145, 219, 0.10) 0%, transparent 60%);
+  }
+
+  /* Glassmorphism auth card */
+  .auth-card {
+    background: rgba(17, 25, 46, 0.72);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(159, 167, 255, 0.12);
+    box-shadow:
+      0 32px 64px -16px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  }
 }

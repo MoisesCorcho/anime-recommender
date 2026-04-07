@@ -15,7 +15,6 @@ new #[Layout('layouts.guest')] class extends Component
     {
         if (Auth::user()->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
-
             return;
         }
 
@@ -36,23 +35,36 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+
+    {{-- Heading --}}
+    <div class="mb-6 text-center">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 mb-4">
+            <span class="material-symbols-outlined text-[var(--color-primary)]" style="font-size:28px;">mark_email_unread</span>
+        </div>
+        <h1 class="font-headline text-2xl font-bold text-[var(--color-on-surface)]">Verifica tu correo</h1>
+        <p class="text-sm text-[var(--color-on-surface-variant)] mt-2 leading-relaxed max-w-sm mx-auto">
+            {{ __('¡Gracias por registrarte! Haz clic en el enlace que enviamos a tu correo electrónico para verificar tu cuenta.') }}
+        </p>
     </div>
 
+    {{-- Sent confirmation --}}
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
+        <x-auth-session-status class="mb-5" :status="__('Se ha enviado un nuevo enlace de verificación a tu correo.')" />
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <x-primary-button wire:click="sendVerification">
-            {{ __('Resend Verification Email') }}
+    {{-- Actions --}}
+    <div class="flex flex-col gap-3 mt-4">
+        <x-primary-button wire:click="sendVerification" class="w-full justify-center">
+            {{ __('Reenviar correo de verificación') }}
         </x-primary-button>
 
-        <button wire:click="logout" type="submit" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-            {{ __('Log Out') }}
+        <button
+            wire:click="logout"
+            type="button"
+            class="w-full text-center text-sm text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-150 py-2"
+        >
+            {{ __('Cerrar sesión') }}
         </button>
     </div>
+
 </div>
