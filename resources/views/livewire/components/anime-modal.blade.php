@@ -29,10 +29,7 @@ on(['open-anime-modal' => function (string $id) {
     aria-modal="true"
 >
     {{-- Glass Backdrop --}}
-    <div
-        class="absolute inset-0 bg-black/40 backdrop-blur-md"
-        @click="show = false"
-    ></div>
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="show = false"></div>
 
     {{-- Modal Panel --}}
     <div class="relative w-full max-w-4xl
@@ -54,11 +51,10 @@ on(['open-anime-modal' => function (string $id) {
             <span class="material-symbols-outlined text-[22px]">close</span>
         </button>
 
-
         @if($anime)
 
-            <div class="w-full flex-shrink-0 relative aspect-[2/3]
-                        md:w-[45%]">
+            {{-- Poster Column --}}
+            <div class="w-full flex-shrink-0 relative aspect-[2/3] md:w-[45%]">
                 <img
                     src="{{ $anime->image_url }}"
                     alt="{{ $anime->title }}"
@@ -68,7 +64,7 @@ on(['open-anime-modal' => function (string $id) {
                 {{-- Right-edge fade into modal background (desktop only) --}}
                 <div class="absolute inset-0 md:bg-gradient-to-r md:from-transparent md:to-surface-container-low z-10 pointer-events-none"></div>
 
-                {{-- Mobile-only close button: floats over the top-right corner of the poster --}}
+                {{-- Mobile close button --}}
                 <button
                     @click="show = false"
                     class="flex items-center justify-center md:hidden absolute top-4 right-4 z-30 p-2 bg-black/50 backdrop-blur-md rounded-full text-white active:bg-black/70 transition-colors"
@@ -79,70 +75,56 @@ on(['open-anime-modal' => function (string $id) {
                 </button>
             </div>
 
+            {{-- Content Column --}}
             <div class="w-full p-8 flex flex-col relative z-20
                         md:absolute md:top-0 md:right-0 md:bottom-0 md:w-[55%]
                         md:p-8 md:overflow-y-auto md:hide-scrollbar">
 
-                {{-- Aesthetic glow blob (background decoration) --}}
+                {{-- Aesthetic glow blob --}}
                 <div class="absolute top-0 right-0 w-full h-64 -z-10 opacity-20 blur-3xl overflow-hidden pointer-events-none">
                     <div class="absolute inset-0 bg-primary/40 rounded-full scale-150 -translate-y-1/2 translate-x-1/2"></div>
                 </div>
 
                 <div class="space-y-5 relative z-10">
 
-                    {{-- Metadata & Title --}}
-                    <div class="space-y-4">
+                    {{-- Badges row --}}
+                    <div class="flex flex-wrap gap-2">
+                        <x-badge :label="$anime->type ?? 'TV Series'" variant="default" />
 
-                        {{-- Badges row --}}
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-surface-variant text-on-surface-variant px-3 py-1 rounded-md text-[10px] font-label uppercase tracking-widest font-bold border border-outline-variant/20">
-                                {{ $anime->type ?? 'TV Series' }}
+                        @if($anime->score && $anime->score >= 8.5)
+                            <x-badge label="Top Rated" variant="tertiary" />
+                        @endif
+                    </div>
+
+                    {{-- Title --}}
+                    <h2 class="text-3xl md:text-4xl font-headline font-extrabold text-white leading-tight tracking-tight">
+                        {{ $anime->title }}
+                    </h2>
+
+                    {{-- Quick stats --}}
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-on-surface-variant text-sm font-label">
+                        @if($anime->score)
+                            <span class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined material-filled text-primary text-[18px]">star</span>
+                                {{ number_format((float)$anime->score, 1) }} Rating
                             </span>
-
-                            @if($anime->score && $anime->score >= 8.5)
-                                <span class="bg-tertiary/10 text-tertiary px-3 py-1 rounded-md text-[10px] font-label uppercase tracking-widest font-bold border border-tertiary/20">
-                                    Top Rated
-                                </span>
-                            @endif
-                        </div>
-
-                        {{-- Title --}}
-                        <h2 class="text-3xl md:text-4xl font-headline font-extrabold text-white leading-tight tracking-tight">
-                            {{ $anime->title }}
-                        </h2>
-
-                        {{-- Quick stats --}}
-                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-on-surface-variant text-sm font-label">
-                            @if($anime->score)
-                                <span class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined material-filled text-primary text-[18px]">star</span>
-                                    {{ number_format((float)$anime->score, 1) }} Rating
-                                </span>
-                            @endif
-
-                            @if($anime->episodes)
-                                <span>{{ $anime->episodes }} Episodes</span>
-                            @endif
-
-                            @if($anime->released_year)
-                                <span>{{ $anime->released_year }}</span>
-                            @endif
-
-                            @if($anime->status)
-                                <span class="capitalize">{{ $anime->status }}</span>
-                            @endif
-
-                        </div>
-
+                        @endif
+                        @if($anime->episodes)
+                            <span>{{ $anime->episodes }} Episodes</span>
+                        @endif
+                        @if($anime->released_year)
+                            <span>{{ $anime->released_year }}</span>
+                        @endif
+                        @if($anime->status)
+                            <span class="capitalize">{{ $anime->status }}</span>
+                        @endif
                     </div>
 
                     {{-- Synopsis --}}
                     @if($anime->description)
                         <div class="space-y-3">
                             <h3 class="text-xs font-label uppercase tracking-[0.2em] text-on-surface-variant font-bold">Synopsis</h3>
-                            <p class="text-on-surface-variant leading-relaxed text-sm max-w-prose">
-                                {{ $anime->description }}
-                            </p>
+                            <p class="text-on-surface-variant leading-relaxed text-sm max-w-prose">{{ $anime->description }}</p>
                         </div>
                     @endif
 
@@ -159,8 +141,6 @@ on(['open-anime-modal' => function (string $id) {
 
                     {{-- User Actions --}}
                     <div class="pt-4 flex flex-wrap items-center gap-4">
-
-                        {{-- + Info --}}
                         <button
                             class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-3.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-transform flex items-center gap-2"
                             id="anime-modal-watch-btn"
@@ -169,7 +149,6 @@ on(['open-anime-modal' => function (string $id) {
                             Where To Watch
                         </button>
 
-                        {{-- Action icon buttons --}}
                         <div class="flex items-center gap-3">
                             <button class="flex items-center justify-center p-3.5 rounded-full border border-outline-variant/20 hover:bg-surface-container-highest text-on-surface transition-all" aria-label="Añadir a favoritos" id="anime-modal-favorite-btn">
                                 <span class="material-symbols-outlined text-[22px]">favorite</span>
@@ -181,7 +160,6 @@ on(['open-anime-modal' => function (string $id) {
                                 <span class="material-symbols-outlined text-[22px]">share</span>
                             </button>
                         </div>
-
                     </div>
 
                 </div>
@@ -190,15 +168,11 @@ on(['open-anime-modal' => function (string $id) {
                 <div class="mt-auto pt-5 grid grid-cols-2 gap-4 border-t border-outline-variant/10">
                     <div>
                         <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Type</p>
-                        <p class="text-sm font-bold text-white">
-                            {{ $anime->type ?? 'N/A' }}
-                        </p>
+                        <p class="text-sm font-bold text-white">{{ $anime->type ?? 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Year</p>
-                        <p class="text-sm font-bold text-white">
-                            {{ $anime->released_year ?? 'N/A' }}
-                        </p>
+                        <p class="text-sm font-bold text-white">{{ $anime->released_year ?? 'N/A' }}</p>
                     </div>
                 </div>
 

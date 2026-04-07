@@ -34,32 +34,22 @@ new class extends Component
 
             {{-- Primary Nav Links (desktop) --}}
             <div class="hidden md:flex gap-6 lg:gap-8 items-center">
-                <a href="{{ route('dashboard') }}"
-                   wire:navigate
-                   class="font-headline text-sm font-medium tracking-tight transition-colors duration-200
-                          {{ request()->routeIs('dashboard') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-slate-200' }}">
+                <x-app-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     Discover
-                </a>
-                @if (Route::has('directory'))
-                <a href="{{ route('directory') }}"
-                   wire:navigate
-                   class="font-headline text-sm font-medium tracking-tight transition-colors duration-200
-                          {{ request()->routeIs('directory') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-slate-200' }}">
-                    Directory
-                </a>
+                </x-app-nav-link>
+
+                @if(Route::has('directory'))
+                    <x-app-nav-link href="{{ route('directory') }}" :active="request()->routeIs('directory')">
+                        Directory
+                    </x-app-nav-link>
                 @else
-                <a href="#"
-                   class="font-headline text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 transition-colors duration-200">
-                    Directory
-                </a>
+                    <x-app-nav-link href="#">Directory</x-app-nav-link>
                 @endif
-                @if (Route::has('my-lists'))
-                <a href="{{ route('my-lists') }}"
-                   wire:navigate
-                   class="font-headline text-sm font-medium tracking-tight transition-colors duration-200
-                          {{ request()->routeIs('my-lists') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-slate-200' }}">
-                    My Lists
-                </a>
+
+                @if(Route::has('my-lists'))
+                    <x-app-nav-link href="{{ route('my-lists') }}" :active="request()->routeIs('my-lists')">
+                        My Lists
+                    </x-app-nav-link>
                 @endif
             </div>
         </div>
@@ -83,17 +73,12 @@ new class extends Component
                  x-on:profile-updated.window="name = $event.detail.name"
                  @click.away="dropdownOpen = false">
 
-                <button @click="dropdownOpen = !dropdownOpen"
-                        class="flex items-center gap-2.5 group">
-                    {{-- Avatar circle with initials --}}
+                <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 group">
                     <div class="w-9 h-9 rounded-full ring-2 ring-indigo-500/40 bg-indigo-600 flex items-center justify-center overflow-hidden hover:ring-indigo-400 transition-all duration-200">
-                        <span class="text-xs font-bold text-white uppercase font-headline"
-                              x-text="name.charAt(0)"></span>
+                        <span class="text-xs font-bold text-white uppercase font-headline" x-text="name.charAt(0)"></span>
                     </div>
-                    <span class="text-sm text-slate-300 font-medium font-headline hidden lg:block"
-                          x-text="name"></span>
-                    <span class="material-symbols-outlined text-[16px] text-slate-500 transition-transform duration-200"
-                          :class="{ 'rotate-180': dropdownOpen }">expand_more</span>
+                    <span class="text-sm text-slate-300 font-medium font-headline hidden lg:block" x-text="name"></span>
+                    <span class="material-symbols-outlined text-[16px] text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': dropdownOpen }">expand_more</span>
                 </button>
 
                 {{-- Dropdown Menu --}}
@@ -156,36 +141,22 @@ new class extends Component
 
         {{-- Mobile Nav Links --}}
         <div class="px-6 py-4 space-y-1">
-            <a href="{{ route('dashboard') }}"
-               wire:navigate
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium font-headline transition-colors
-                      {{ request()->routeIs('dashboard') ? 'text-white bg-indigo-500/15 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                <span class="material-symbols-outlined text-[18px]">explore</span>
+            <x-app-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="explore" :mobile="true">
                 Discover
-            </a>
-            @if (Route::has('directory'))
-            <a href="{{ route('directory') }}"
-               wire:navigate
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors font-headline
-                      {{ request()->routeIs('directory') ? 'text-white bg-indigo-500/15 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                <span class="material-symbols-outlined text-[18px]">grid_view</span>
-                Directory
-            </a>
+            </x-app-nav-link>
+
+            @if(Route::has('directory'))
+                <x-app-nav-link href="{{ route('directory') }}" :active="request()->routeIs('directory')" icon="grid_view" :mobile="true">
+                    Directory
+                </x-app-nav-link>
             @else
-            <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-headline">
-                <span class="material-symbols-outlined text-[18px]">grid_view</span>
-                Directory
-            </a>
+                <x-app-nav-link href="#" icon="grid_view" :mobile="true">Directory</x-app-nav-link>
             @endif
-            @if (Route::has('my-lists'))
-            <a href="{{ route('my-lists') }}"
-               wire:navigate
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors font-headline
-                      {{ request()->routeIs('my-lists') ? 'text-white bg-indigo-500/15 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                <span class="material-symbols-outlined text-[18px]">bookmarks</span>
-                My List
-            </a>
+
+            @if(Route::has('my-lists'))
+                <x-app-nav-link href="{{ route('my-lists') }}" :active="request()->routeIs('my-lists')" icon="bookmarks" :mobile="true">
+                    My List
+                </x-app-nav-link>
             @endif
         </div>
 
@@ -215,7 +186,7 @@ new class extends Component
                     <span class="material-symbols-outlined text-[18px]">logout</span>
                     Log Out
                 </button>
+            </div>
         </div>
     </div>
 </nav>
-
