@@ -25,6 +25,7 @@ return new class extends Migration
             $table->unique(['user_id', 'anime_id'], 'anime_user_unique');
 
             $table->string('status')
+                ->nullable()
                 ->comment('Tracking status for this anime: WATCHING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_WATCH, BLACKLISTED.');
 
             $table->boolean('is_favorite')

@@ -1,14 +1,82 @@
 <?php
 
+use App\Enums\UserAnimeStatus;
 use App\Models\Anime;
+use Illuminate\Support\Facades\Auth;
 use function Livewire\Volt\{state, on};
 
-state(['showModal' => false, 'anime' => null]);
+state([
+    'showModal'   => false,
+    'anime'       => null,
+    'userStatus'  => null,      // UserAnimeStatus value string or null
+    'isFavorite'  => false,
+    'showToast'   => false,
+    'toastMessage' => '',
+]);
 
 on(['open-anime-modal' => function (string $id) {
-    $this->anime     = Anime::find($id);
-    $this->showModal = true;
+    $this->anime      = Anime::find($id);
+    $this->showModal  = true;
+    $this->userStatus = null;
+    $this->isFavorite = false;
+
+    if (Auth::check() && $this->anime) {
+        $pivot = Auth::user()->animes()
+            ->where('anime_id', $this->anime->id)
+            ->first()?->pivot;
+
+        if ($pivot) {
+            $this->userStatus = $pivot->status?->value;
+            $this->isFavorite = (bool) $pivot->is_favorite;
+        }
+    }
 }]);
+
+$updateStatus = function (string $status) {
+    if (! Auth::check() || ! $this->anime) return;
+
+    Auth::user()->animes()->syncWithoutDetaching([
+        $this->anime->id => ['status' => $status],
+    ]);
+
+    $this->userStatus = $status;
+
+    $labels = [
+        UserAnimeStatus::PlanToWatch->value => 'Plan to Watch',
+        UserAnimeStatus::Watching->value    => 'Watching',
+        UserAnimeStatus::OnHold->value      => 'On Hold',
+        UserAnimeStatus::Completed->value   => 'Completed',
+        UserAnimeStatus::Dropped->value     => 'Dropped',
+    ];
+
+    $this->toastMessage = 'Added to ' . ($labels[$status] ?? $status);
+    $this->showToast    = true;
+};
+
+$toggleFavorite = function () {
+    if (! Auth::check() || ! $this->anime) return;
+
+    $this->isFavorite = ! $this->isFavorite;
+
+    Auth::user()->animes()->syncWithoutDetaching([
+        $this->anime->id => ['is_favorite' => $this->isFavorite],
+    ]);
+
+    $this->toastMessage = $this->isFavorite ? 'Added to Favorites' : 'Removed from Favorites';
+    $this->showToast    = true;
+};
+
+$markAsDropped = function () {
+    if (! Auth::check() || ! $this->anime) return;
+
+    Auth::user()->animes()->syncWithoutDetaching([
+        $this->anime->id => ['status' => UserAnimeStatus::Dropped->value],
+    ]);
+
+    $this->userStatus   = UserAnimeStatus::Dropped->value;
+    $this->toastMessage = 'Marked as Dropped';
+    $this->showToast    = true;
+};
 
 ?>
 
@@ -30,6 +98,28 @@ on(['open-anime-modal' => function (string $id) {
 >
     {{-- Glass Backdrop --}}
     <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="show = false"></div>
+
+    {{-- Toast Notification --}}
+    <div
+        wire:poll.1500ms="$set('showToast', false)"
+        x-show="$wire.showToast"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-2"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000]
+               flex items-center gap-2.5 px-5 py-3 rounded-full
+               bg-[var(--color-surface-container-highest)]
+               border border-[var(--color-outline-variant)]/20
+               shadow-[0_8px_32px_rgba(0,0,0,0.5)]
+               text-sm font-medium text-[var(--color-on-surface)]"
+        style="display: none;"
+    >
+        <span class="material-symbols-outlined material-filled text-[var(--color-primary)] text-[18px]">check_circle</span>
+        <span>{{ $toastMessage }}</span>
+    </div>
 
     {{-- Modal Panel --}}
     <div class="relative w-full max-w-4xl
@@ -87,14 +177,14 @@ on(['open-anime-modal' => function (string $id) {
 
                 <div class="space-y-5 relative z-10">
 
-                    {{-- Badges row --}}
-                    <div class="flex flex-wrap gap-2">
-                        <x-badge :label="$anime->type ?? 'TV Series'" variant="default" />
-
-                        @if($anime->score && $anime->score >= 8.5)
-                            <x-badge label="Top Rated" variant="tertiary" />
+                    {{-- Type and Year --}}
+                    <p class="font-label text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">
+                        {{ $anime->type ?? 'Series' }}
+                        @if($anime->released_year)
+                            <span class="text-[var(--color-on-surface-variant)] mx-1.5">•</span>
+                            {{ $anime->released_year }}
                         @endif
-                    </div>
+                    </p>
 
                     {{-- Title --}}
                     <h2 class="text-3xl md:text-4xl font-headline font-extrabold text-white leading-tight tracking-tight">
@@ -111,9 +201,6 @@ on(['open-anime-modal' => function (string $id) {
                         @endif
                         @if($anime->episodes)
                             <span>{{ $anime->episodes }} Episodes</span>
-                        @endif
-                        @if($anime->released_year)
-                            <span>{{ $anime->released_year }}</span>
                         @endif
                         @if($anime->status)
                             <span class="capitalize">{{ $anime->status }}</span>
@@ -141,41 +228,109 @@ on(['open-anime-modal' => function (string $id) {
 
                     {{-- User Actions --}}
                     <div class="pt-4 flex flex-wrap items-center gap-4">
-                        <button
-                            class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-3.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-transform flex items-center gap-2"
-                            id="anime-modal-watch-btn"
-                        >
-                            <span class="material-symbols-outlined material-filled text-[20px]">play_circle</span>
-                            Where To Watch
-                        </button>
 
+                        {{-- Add to List Dropdown --}}
+                        <x-dropdown align="left" width="56">
+                            <x-slot name="trigger">
+                                <button
+                                    id="anime-modal-add-list-btn"
+                                    class="flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm
+                                           shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform
+                                           {{ $userStatus
+                                               ? 'bg-[var(--color-surface-container-highest)] text-[var(--color-primary)] border border-[var(--color-primary)]/30'
+                                               : 'bg-gradient-to-br from-primary to-primary-container text-on-primary'
+                                           }}"
+                                >
+                                    <span class="material-symbols-outlined material-filled text-[20px]">
+                                        {{ $userStatus ? 'playlist_add_check' : 'playlist_add' }}
+                                    </span>
+                                    {{ $userStatus
+                                        ? match($userStatus) {
+                                            'PLAN_TO_WATCH' => 'Plan to Watch',
+                                            'WATCHING'      => 'Watching',
+                                            'ON_HOLD'       => 'On Hold',
+                                            'COMPLETED'     => 'Completed',
+                                            'DROPPED'       => 'Dropped',
+                                            default         => 'In My List',
+                                          }
+                                        : 'Add to List'
+                                    }}
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <div class="py-1">
+                                    <p class="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-on-surface-variant)]">
+                                        My Lists
+                                    </p>
+                                    <x-dropdown-link wire:click="updateStatus('{{ \App\Enums\UserAnimeStatus::PlanToWatch->value }}')">
+                                        <span class="material-symbols-outlined text-[18px] text-[var(--color-primary)]">bookmark</span>
+                                        Plan to Watch
+                                        @if($userStatus === \App\Enums\UserAnimeStatus::PlanToWatch->value)
+                                            <span class="material-symbols-outlined material-filled text-[16px] text-[var(--color-primary)] ml-auto">check</span>
+                                        @endif
+                                    </x-dropdown-link>
+                                    <x-dropdown-link wire:click="updateStatus('{{ \App\Enums\UserAnimeStatus::Watching->value }}')">
+                                        <span class="material-symbols-outlined text-[18px] text-[var(--color-primary)]">play_circle</span>
+                                        Watching
+                                        @if($userStatus === \App\Enums\UserAnimeStatus::Watching->value)
+                                            <span class="material-symbols-outlined material-filled text-[16px] text-[var(--color-primary)] ml-auto">check</span>
+                                        @endif
+                                    </x-dropdown-link>
+                                    <x-dropdown-link wire:click="updateStatus('{{ \App\Enums\UserAnimeStatus::OnHold->value }}')">
+                                        <span class="material-symbols-outlined text-[18px] text-[var(--color-primary)]">pause_circle</span>
+                                        On Hold
+                                        @if($userStatus === \App\Enums\UserAnimeStatus::OnHold->value)
+                                            <span class="material-symbols-outlined material-filled text-[16px] text-[var(--color-primary)] ml-auto">check</span>
+                                        @endif
+                                    </x-dropdown-link>
+                                    <x-dropdown-link wire:click="updateStatus('{{ \App\Enums\UserAnimeStatus::Completed->value }}')">
+                                        <span class="material-symbols-outlined text-[18px] text-[var(--color-primary)]">check_circle</span>
+                                        Completed
+                                        @if($userStatus === \App\Enums\UserAnimeStatus::Completed->value)
+                                            <span class="material-symbols-outlined material-filled text-[16px] text-[var(--color-primary)] ml-auto">check</span>
+                                        @endif
+                                    </x-dropdown-link>
+                                </div>
+                            </x-slot>
+                        </x-dropdown>
+
+                        {{-- Icon Buttons --}}
                         <div class="flex items-center gap-3">
-                            <button class="flex items-center justify-center p-3.5 rounded-full border border-outline-variant/20 hover:bg-surface-container-highest text-on-surface transition-all" aria-label="Añadir a favoritos" id="anime-modal-favorite-btn">
-                                <span class="material-symbols-outlined text-[22px]">favorite</span>
+
+                            {{-- Favorite --}}
+                            <button
+                                wire:click="toggleFavorite"
+                                class="flex items-center justify-center p-3.5 rounded-full border transition-all
+                                       {{ $isFavorite
+                                           ? 'bg-[var(--color-tertiary)]/10 border-[var(--color-tertiary)]/30 text-[var(--color-tertiary)]'
+                                           : 'border-outline-variant/20 hover:bg-surface-container-highest text-on-surface'
+                                       }}"
+                                aria-label="{{ $isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos' }}"
+                                id="anime-modal-favorite-btn"
+                            >
+                                <span class="material-symbols-outlined text-[22px] {{ $isFavorite ? 'material-filled' : '' }}">
+                                    favorite
+                                </span>
                             </button>
-                            <button class="flex items-center justify-center p-3.5 rounded-full border border-outline-variant/20 hover:bg-error/10 hover:text-error hover:border-error/30 text-on-surface transition-all" aria-label="Bloquear" id="anime-modal-block-btn">
+
+                            {{-- Dropped --}}
+                            <button
+                                wire:click="markAsDropped"
+                                class="flex items-center justify-center p-3.5 rounded-full border transition-all
+                                       {{ $userStatus === \App\Enums\UserAnimeStatus::Dropped->value
+                                           ? 'bg-[var(--color-error)]/10 border-[var(--color-error)]/30 text-[var(--color-error)]'
+                                           : 'border-outline-variant/20 hover:bg-error/10 hover:text-error hover:border-error/30 text-on-surface'
+                                       }}"
+                                aria-label="Marcar como Dropped"
+                                id="anime-modal-dropped-btn"
+                            >
                                 <span class="material-symbols-outlined text-[22px]">block</span>
                             </button>
-                            <button class="flex items-center justify-center p-3.5 rounded-full border border-outline-variant/20 hover:bg-surface-container-highest text-on-surface transition-all" aria-label="Compartir" id="anime-modal-share-btn">
-                                <span class="material-symbols-outlined text-[22px]">share</span>
-                            </button>
+
                         </div>
                     </div>
 
                 </div>
-
-                {{-- Footer Detail Row --}}
-                <div class="mt-auto pt-5 grid grid-cols-2 gap-4 border-t border-outline-variant/10">
-                    <div>
-                        <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Type</p>
-                        <p class="text-sm font-bold text-white">{{ $anime->type ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Year</p>
-                        <p class="text-sm font-bold text-white">{{ $anime->released_year ?? 'N/A' }}</p>
-                    </div>
-                </div>
-
             </div>
 
         @else
