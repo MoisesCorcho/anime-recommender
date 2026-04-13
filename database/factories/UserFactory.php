@@ -42,4 +42,19 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Assign a random 1536-dimension preference vector to the user.
+     *
+     * Useful for tests that need an already-initialised preference profile
+     * without going through the full EMA calculation pipeline.
+     */
+    public function withPreferenceVector(): static
+    {
+        return $this->state([
+            'preference_vector' => json_encode(
+                array_map(fn (): float => fake()->randomFloat(6, -1, 1), range(0, 1535)),
+            ),
+        ]);
+    }
 }

@@ -37,6 +37,7 @@ services:
         volumes:
             - 'sail-pgsql:/var/lib/postgresql'
             - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            - './docker/pgsql/animes_backup.sql:/docker-entrypoint-initdb.d/20-animes-backup.sql'
         networks:
             - sail
         healthcheck:
