@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\UserAnimeStatus;
+use App\Observers\AnimeUserObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use InvalidArgumentException;
@@ -16,7 +18,7 @@ use InvalidArgumentException;
  * Manages the full tracking relationship between a User and an Anime,
  * including watching status, personal score, episodes seen, and favourites.
  * Extends Pivot (not Model) so that Eloquent treats it as an intermediary
- * and fires the correct lifecycle events for future Observer hooks.
+ * and fires the correct lifecycle events for Observer hooks.
  *
  * @property int $user_id
  * @property string $anime_id
@@ -25,6 +27,7 @@ use InvalidArgumentException;
  * @property int|null $score
  * @property int $episodes_watched
  */
+#[ObservedBy([AnimeUserObserver::class])]
 #[Fillable(['user_id', 'anime_id', 'status', 'is_favorite', 'score', 'episodes_watched'])]
 class AnimeUser extends Pivot
 {

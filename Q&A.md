@@ -183,6 +183,79 @@ Se recomienda crear una tabla dedicada (por ejemplo: `user_interactions` o `user
 
 Esto permite registrar de forma estructurada el comportamiento del usuario y utilizarlo posteriormente para análisis o personalización.
 
+### ¿Cómo se usa el enum `InteractionType` para garantizar un payload consistente?
+
+El enum `App\Enums\InteractionType` centraliza tanto los tipos de interacción como la **forma exacta del payload** de cada uno. Nunca se construye el array de payload a mano — siempre se usa el método estático correspondiente. Esto garantiza que todos los registros en `user_interactions` tengan una estructura uniforme y que el IDE valide los tipos en tiempo de desarrollo.
+
+#### Métodos disponibles y su contrato
+
+**`SemanticSearch` — búsqueda por lenguaje natural**
+```php
+InteractionType::semanticSearchPayload(string $query, int $resultsCount): array
+// Produce: ['query' => '...', 'results_count' => 12]
+```
+
+**`CatalogFilter` — búsqueda por filtros estructurados**
+```php
+InteractionType::catalogFilterPayload(array $filters, int $resultsCount): array
+// Produce: ['filters' => ['genre' => 'Action', 'year' => 2023], 'results_count' => 24]
+```
+
+**`AnimeView` — usuario abre la vista de detalle de un anime**
+```php
+InteractionType::animeViewPayload(string $animeId): array
+// Produce: ['anime_id' => '01JXXXXXXXXXXXXXXXX']
+```
+
+**`FavoriteAdd` — usuario agrega un anime a favoritos**
+```php
+InteractionType::favoriteAddPayload(string $animeId): array
+// Produce: ['anime_id' => '01JXXXXXXXXXXXXXXXX']
+```
+
+#### Ejemplo completo de uso
+
+```php
+use App\Enums\InteractionType;
+use App\Jobs\LogUserInteractionJob;
+
+// Búsqueda semántica
+LogUserInteractionJob::dispatch(
+    user: $user,                          // null si es invitado
+    type: InteractionType::SemanticSearch,
+    payload: InteractionType::semanticSearchPayload(
+        query: 'anime de samurai con mucha acción',
+        resultsCount: $results->count(),
+    ),
+);
+
+// Filtro de catálogo
+LogUserInteractionJob::dispatch(
+    user: $user,
+    type: InteractionType::CatalogFilter,
+    payload: InteractionType::catalogFilterPayload(
+        filters: ['genre' => 'Action', 'status' => 'airing'],
+        resultsCount: $results->count(),
+    ),
+);
+
+// Vista de detalle de anime
+LogUserInteractionJob::dispatch(
+    user: auth()->user(),                 // null si es invitado
+    type: InteractionType::AnimeView,
+    payload: InteractionType::animeViewPayload(animeId: $anime->id),
+);
+
+// Favorito agregado
+LogUserInteractionJob::dispatch(
+    user: $user,
+    type: InteractionType::FavoriteAdd,
+    payload: InteractionType::favoriteAddPayload(animeId: $anime->id),
+);
+```
+
+> **Regla crítica:** El Job es asincrónico (`ShouldQueue`). Se despacha con `dispatch()` y corre en segundo plano sobre Redis — nunca bloquea la respuesta HTTP ni el ciclo de Livewire.
+
 ---
 
 ## 14. Vectorización del Comportamiento del Usuario
@@ -330,7 +403,51 @@ Si un usuario busca algo muy raro (ej. "Hentai") por pura curiosidad morbosa o u
 
 ---
 
-## 24. Patrón Action Class
+## 24. Triggers del `preference_vector`: Cuándo Recalcular el Perfil del Usuario
+
+### ¿En qué situaciones se debe recalcular el `preference_vector` del usuario?
+
+La regla maestra es: **buscar no es preferir**. Solo las interacciones explícitas con el contenido actualizan el vector. Si se actualiza el vector con búsquedas o filtros de catálogo, se contamina el perfil del usuario (ver sección 23).
+
+#### Triggers que SÍ deben actualizar el vector
+
+| Señal | Columna que cambia en `anime_user` | Peso conceptual |
+|---|---|---|
+| Usuario completa un anime | `status = 'COMPLETED'` | Alto — lo terminó, señal de consumo real |
+| Usuario agrega a favoritos | `is_favorite = true` | Alto — declaración explícita de gusto |
+| Usuario pone una puntuación | `score = 1-10` | Ponderado — amplifica o reduce según el valor |
+| Usuario marca como "Viendo" | `status = 'WATCHING'` | Bajo/opcional — interés débil, no certeza de gusto |
+
+#### Triggers que NO deben actualizar el vector
+
+| Señal | Razón |
+|---|---|
+| `PLAN_TO_WATCH` | Solo curiosidad, cero consumo real |
+| `ON_HOLD` | Lo pausó — señal ambigua sin conclusión |
+| `DROPPED` | Lo abandonó — no refleja preferencia genuina |
+| `BLACKLISTED` | Se filtra por SQL (`WHERE id NOT IN (...)`), nunca toca el vector (ver sección 22) |
+| Búsqueda semántica | Contamina el perfil con curiosidad transitoria (ver sección 23) |
+| Filtros de catálogo | Solo sirve para analítica del negocio, no para personalización |
+
+#### Implementación arquitectónica
+
+El patrón correcto (documentado en sección 20) es un **`AnimeUserObserver`** que escuche el evento `saved()` del pivot model `AnimeUser`. Cuando el observer detecta un cambio en las columnas relevantes (`status`, `is_favorite`, `score`), despacha asincrónicamente un Job que aplica la fórmula EMA sobre el vector del usuario (ver sección 17):
+
+```
+Nuevo_Vector = (Vector_Viejo * α) + (Vector_Anime * (1 - α))
+```
+
+#### Estado actual del código
+
+A la fecha, **ninguno de estos mecanismos está implementado**. La infraestructura existe (columna `preference_vector`, modelo `AnimeUser` como pivot con eventos Eloquent habilitados), pero faltan:
+
+1. `AnimeUserObserver` — no existe en `app/Observers/`
+2. Job de recálculo EMA — no existe en `app/Jobs/`
+3. Índice HNSW sobre `users.preference_vector` — no existe en las migraciones
+
+---
+
+## 25. Patrón Action Class
 
 ### ¿Las clases dentro de `app/Actions/` son una feature de Laravel o un patrón de arquitectura?
 

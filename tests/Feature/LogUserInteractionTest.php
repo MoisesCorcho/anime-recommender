@@ -12,7 +12,7 @@ uses(RefreshDatabase::class);
 
 it('persists an authenticated user interaction to the database', function () {
     $user = User::factory()->create();
-    $payload = ['query' => 'attack on titan', 'filters' => ['genre' => 'Action']];
+    $payload = InteractionType::semanticSearchPayload('attack on titan', 5);
 
     dispatch(new LogUserInteractionJob(
         user: $user,
@@ -30,7 +30,7 @@ it('persists an authenticated user interaction to the database', function () {
 });
 
 it('persists a guest interaction with null user_id', function () {
-    $payload = ['anime_id' => 'some-ulid'];
+    $payload = InteractionType::animeViewPayload('some-ulid');
 
     dispatch(new LogUserInteractionJob(
         user: null,
