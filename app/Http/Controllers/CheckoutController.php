@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\SubscriptionTier;
 use App\Models\User;
 use App\Services\CreditCheckoutService;
 use Illuminate\Http\RedirectResponse;
@@ -30,6 +31,10 @@ class CheckoutController extends Controller
 
         /** @var User $user */
         $user = $request->user();
+
+        if ($plan === 'pro' && $user->subscription_tier === SubscriptionTier::Pro) {
+            return redirect()->back()->with('error', 'You already have an active subscription.');
+        }
 
         $dto = $this->checkout->createCheckoutSession($user, $plan);
 

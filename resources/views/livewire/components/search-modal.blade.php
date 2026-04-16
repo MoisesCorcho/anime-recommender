@@ -2,7 +2,9 @@
 
 use App\Actions\Animes\SearchAnimesByNaturalLanguageAction;
 use App\Enums\InteractionType;
+use App\Enums\SubscriptionTier;
 use App\Exceptions\InsufficientCreditsException;
+use App\Models\User;
 use App\Jobs\LogUserInteractionJob;
 use App\Services\CreditCheckoutService;
 use App\Services\CreditService;
@@ -85,7 +87,14 @@ $selectAnime = function ($id) {
 };
 
 $checkout = function (string $plan, CreditCheckoutService $checkoutService) {
-    $dto = $checkoutService->createCheckoutSession(auth()->user(), $plan);
+    /** @var User $user */
+    $user = auth()->user();
+
+    if ($plan === 'pro' && $user->subscription_tier === SubscriptionTier::Pro) {
+        return;
+    }
+
+    $dto = $checkoutService->createCheckoutSession($user, $plan);
     return redirect()->away($dto->checkoutUrl);
 };
 
@@ -275,21 +284,29 @@ $recentSearches = computed(function () {
 
         <div class="space-y-2">
             <h2 class="text-2xl font-headline font-bold text-on-surface">Out of Credits</h2>
-            <p class="text-on-surface-variant">Semantic searches require credits. Upgrade to Pro or buy a credit pack to continue exploring with AI.</p>
+            <p class="text-on-surface-variant">
+                @if(auth()->user()->subscription_tier === SubscriptionTier::Pro)
+                    You've used all your monthly Pro credits. Buy a credit pack to continue exploring with AI.
+                @else
+                    Semantic searches require credits. Upgrade to Pro or buy a credit pack to continue exploring with AI.
+                @endif
+            </p>
         </div>
 
         <div class="grid grid-cols-1 gap-3 w-full mt-4">
             {{-- Pro Subscription --}}
-            <button wire:click="checkout('pro')" class="group relative flex items-center justify-between p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-left">
-                <div>
-                    <div class="font-bold text-on-surface flex items-center gap-2">
-                        Pro Subscription
-                        <span class="px-2 py-0.5 rounded-full bg-primary text-[10px] text-on-primary uppercase tracking-wider">Best Value</span>
+            @if(auth()->user()->subscription_tier !== SubscriptionTier::Pro)
+                <button wire:click="checkout('pro')" class="group relative flex items-center justify-between p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-left">
+                    <div>
+                        <div class="font-bold text-on-surface flex items-center gap-2">
+                            Pro Subscription
+                            <span class="px-2 py-0.5 rounded-full bg-primary text-[10px] text-on-primary uppercase tracking-wider">Best Value</span>
+                        </div>
+                        <div class="text-xs text-on-surface-variant">5000 credits/mo + faster searches</div>
                     </div>
-                    <div class="text-xs text-on-surface-variant">5000 credits/mo + faster searches</div>
-                </div>
-                <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
-            </button>
+                    <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </button>
+            @endif
 
             {{-- Credit Packs --}}
             @foreach(['pack_100' => 100, 'pack_500' => 500, 'pack_1000' => 1000] as $key => $amount)

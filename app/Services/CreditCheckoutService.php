@@ -86,12 +86,7 @@ final class CreditCheckoutService
         if ($mode === 'subscription') {
             $user->subscription_tier = SubscriptionTier::Pro;
             $user->save();
-
-            $this->credits->topUp($user, new CreditTopUpDTO(
-                amount: (int) config('credits.pro_monthly_allowance', 5000),
-                reason: CreditTransactionReason::SubscriptionRenewal,
-                referenceId: $sessionData['payment_intent'] ?? null,
-            ));
+            // Credits for subscriptions are handled by handleInvoicePaid to avoid duplication
         } elseif ($mode === 'payment' && $plan !== null) {
             $packCredits = config("credits.pack_credits.{$plan}");
 

@@ -16,6 +16,16 @@ final class TopUpCreditsAction
 {
     public function execute(User $user, CreditTopUpDTO $dto): CreditTransaction
     {
+        if ($dto->referenceId !== null) {
+            $existing = CreditTransaction::where('user_id', $user->id)
+                ->where('reference_id', $dto->referenceId)
+                ->first();
+
+            if ($existing !== null) {
+                return $existing;
+            }
+        }
+
         $newBalance = $user->credit_balance + $dto->amount;
 
         $user->credit_balance = $newBalance;
