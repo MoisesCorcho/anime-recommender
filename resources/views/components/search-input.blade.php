@@ -5,6 +5,7 @@
     'id'           => null,
     'size'         => 'md', // 'sm' | 'md' | 'lg'
     'autofocus'    => false,
+    'defer'        => false,
 ])
 
 @php
@@ -33,7 +34,11 @@
     <span class="material-symbols-outlined text-primary {{ $iconSize }} flex-shrink-0">search</span>
 
     <input
-        wire:model.live.debounce.{{ $debounce }}="{{ $model }}"
+        @if($defer)
+            wire:model="{{ $model }}"
+        @else
+            wire:model.live.debounce.{{ $debounce }}="{{ $model }}"
+        @endif
         type="text"
         @if($id) id="{{ $id }}" @endif
         placeholder="{{ $placeholder }}"

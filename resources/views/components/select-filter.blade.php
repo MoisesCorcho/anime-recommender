@@ -3,6 +3,7 @@
     'model',
     'options'     => [],   // associative array: ['value' => 'Label', ...]
     'placeholder' => 'All',
+    'defer'       => false,
 ])
 
 <div>
@@ -10,7 +11,11 @@
         {{ $label }}
     </label>
     <select
-        wire:model.live="{{ $model }}"
+        @if($defer)
+            wire:model="{{ $model }}"
+        @else
+            wire:model.live="{{ $model }}"
+        @endif
         class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4
                text-on-surface focus:ring-2 focus:ring-primary transition-all
                cursor-pointer text-sm shadow-inner font-medium"

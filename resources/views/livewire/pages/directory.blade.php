@@ -1,9 +1,12 @@
 <?php
 
+use App\Enums\InteractionType;
+use App\Jobs\LogUserInteractionJob;
 use App\Models\Anime;
+use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Cache;
-use function Livewire\Volt\{state, computed, uses, layout};
+use function Livewire\Volt\{state, computed, uses, layout, updated};
 
 layout('layouts.app');
 uses([WithPagination::class]);
@@ -16,11 +19,35 @@ state([
     'sort'   => 'a-z'
 ])->url(); // Maintain URL state so links can be shared
 
+$applyFilters = function () {
+    if (! Auth::check()) return;
+
+    $filters = array_filter([
+        'search' => !empty($this->search) ? $this->search : null,
+        'genre'  => $this->genre !== 'all' ? $this->genre : null,
+        'year'   => $this->year !== 'all' ? $this->year : null,
+        'type'   => $this->type !== 'all' ? $this->type : null,
+        'sort'   => $this->sort !== 'a-z' ? $this->sort : null,
+    ]);
+
+    if (empty($filters)) return;
+
+    LogUserInteractionJob::dispatch(
+        user: Auth::user(),
+        type: InteractionType::CatalogFilter,
+        payload: InteractionType::catalogFilterPayload(
+            filters: $filters,
+            resultsCount: $this->animes->total()
+        )
+    );
+};
+
 $clearFilters = function () {
     $this->search = '';
     $this->genre = 'all';
     $this->year = 'all';
     $this->type = 'all';
+    $this->sort = 'a-z';
 };
 
 $availableYears = computed(function () {
@@ -105,7 +132,7 @@ $animes = computed(function () {
             {{-- Text search --}}
             <div class="col-span-2 sm:flex-1 min-w-[200px] w-full">
                 <label class="block text-label text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Filter by name</label>
-                <x-search-input model="search" placeholder="Type title..." debounce="300ms" size="sm" />
+                <x-search-input model="search" placeholder="Type title..." size="sm" :defer="true" />
             </div>
 
             {{-- Type --}}
@@ -115,12 +142,13 @@ $animes = computed(function () {
                     model="type"
                     placeholder="Any Type"
                     :options="['TV' => 'TV Series', 'Movie' => 'Movies', 'OVA' => 'OVA', 'Special' => 'Specials']"
+                    :defer="true"
                 />
             </div>
 
             {{-- Genre --}}
             <div class="w-full sm:w-auto sm:flex-1 md:flex-none md:w-48">
-                <x-select-filter label="Genre" model="genre" placeholder="All Genres">
+                <x-select-filter label="Genre" model="genre" placeholder="All Genres" :defer="true">
                     @foreach($this->availableGenres as $g)
                         <option value="{{ $g }}">{{ $g }}</option>
                     @endforeach
@@ -129,7 +157,7 @@ $animes = computed(function () {
 
             {{-- Year --}}
             <div class="w-full sm:w-auto sm:flex-1 md:flex-none md:w-36">
-                <x-select-filter label="Year" model="year" placeholder="Any Year">
+                <x-select-filter label="Year" model="year" placeholder="Any Year" :defer="true">
                     @foreach($this->availableYears as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
                     @endforeach
@@ -143,7 +171,19 @@ $animes = computed(function () {
                     model="sort"
                     placeholder=""
                     :options="['a-z' => 'A to Z', 'z-a' => 'Z to A', 'latest_added' => 'Latest Added']"
+                    :defer="true"
                 />
+            </div>
+
+            {{-- Filter Button --}}
+            <div class="col-span-2 sm:w-full md:w-auto">
+                <button
+                    wire:click="applyFilters"
+                    class="w-full md:w-auto px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 transition-all text-on-primary font-bold text-sm tracking-wide shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                    <span class="material-symbols-outlined text-[20px]">filter_alt</span>
+                    Filter
+                </button>
             </div>
         </section>
 

@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\InteractionType;
 use App\Enums\UserAnimeStatus;
+use App\Jobs\LogUserInteractionJob;
 use App\Models\Anime;
 use Illuminate\Support\Facades\Auth;
 use function Livewire\Volt\{state, on};
@@ -21,7 +23,8 @@ on(['open-anime-modal' => function (string $id) {
     $this->isFavorite = false;
 
     if (Auth::check() && $this->anime) {
-        $pivot = Auth::user()->animes()
+        $user = Auth::user();
+        $pivot = $user->animes()
             ->where('anime_id', $this->anime->id)
             ->first()?->pivot;
 
@@ -29,6 +32,13 @@ on(['open-anime-modal' => function (string $id) {
             $this->userStatus = $pivot->status?->value;
             $this->isFavorite = (bool) $pivot->is_favorite;
         }
+
+        // Log the view interaction asynchronously
+        LogUserInteractionJob::dispatch(
+            user: $user,
+            type: InteractionType::AnimeView,
+            payload: InteractionType::animeViewPayload(animeId: (string) $this->anime->id)
+        );
     }
 }]);
 
@@ -57,10 +67,20 @@ $toggleFavorite = function () {
     if (! Auth::check() || ! $this->anime) return;
 
     $this->isFavorite = ! $this->isFavorite;
+    $user = Auth::user();
 
-    Auth::user()->animes()->syncWithoutDetaching([
+    $user->animes()->syncWithoutDetaching([
         $this->anime->id => ['is_favorite' => $this->isFavorite],
     ]);
+
+    // Log favorite addition interaction
+    if ($this->isFavorite) {
+        LogUserInteractionJob::dispatch(
+            user: $user,
+            type: InteractionType::FavoriteAdd,
+            payload: InteractionType::favoriteAddPayload(animeId: (string) $this->anime->id)
+        );
+    }
 
     $this->toastMessage = $this->isFavorite ? 'Added to Favorites' : 'Removed from Favorites';
     $this->showToast    = true;
