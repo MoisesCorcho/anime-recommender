@@ -57,6 +57,27 @@ new class extends Component
         {{-- RIGHT: Actions + User --}}
         <div class="flex items-center gap-3 sm:gap-5">
 
+            {{-- NSFW Toggle (Desktop) --}}
+            <div
+                x-data="{ nsfw: {{ Session::get('show_nsfw', false) ? 'true' : 'false' }} }"
+                class="hidden md:flex items-center gap-2"
+                title="{{ Session::get('show_nsfw', false) ? 'Hide NSFW content' : 'Show NSFW content' }}"
+            >
+                <span class="hidden sm:block font-headline text-sm font-medium tracking-tight text-slate-400 select-none">NSFW</span>
+                <button
+                    @click="nsfw = !nsfw; Livewire.dispatch('nsfw-toggled', { value: nsfw })"
+                    :aria-pressed="nsfw.toString()"
+                    aria-label="Toggle NSFW content"
+                    class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-300 focus:outline-none cursor-pointer"
+                    :class="nsfw ? 'bg-rose-500/80' : 'bg-slate-700'"
+                >
+                    <span
+                        class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-300"
+                        :class="nsfw ? 'translate-x-[18px]' : 'translate-x-[3px]'"
+                    ></span>
+                </button>
+            </div>
+
             {{-- Search Button --}}
             <button @click="$dispatch('open-search-modal')" class="flex p-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300 text-slate-400 hover:text-slate-200">
                 <span class="material-symbols-outlined text-[22px]">search</span>
@@ -158,6 +179,28 @@ new class extends Component
                     My List
                 </x-app-nav-link>
             @endif
+
+            {{-- Mobile NSFW Toggle --}}
+            <div
+                x-data="{ nsfw: {{ Session::get('show_nsfw', false) ? 'true' : 'false' }} }"
+                class="flex items-center justify-between px-3 py-2.5 mt-2 rounded-lg"
+            >
+                <div class="flex items-center gap-3 text-slate-400">
+                    <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                    <span class="text-sm font-medium font-headline">NSFW Content</span>
+                </div>
+                <button
+                    @click="nsfw = !nsfw; Livewire.dispatch('nsfw-toggled', { value: nsfw })"
+                    :aria-pressed="nsfw.toString()"
+                    class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-300 focus:outline-none cursor-pointer"
+                    :class="nsfw ? 'bg-rose-500/80' : 'bg-slate-700'"
+                >
+                    <span
+                        class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-300"
+                        :class="nsfw ? 'translate-x-[18px]' : 'translate-x-[3px]'"
+                    ></span>
+                </button>
+            </div>
         </div>
 
         {{-- Mobile User Section --}}

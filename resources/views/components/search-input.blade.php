@@ -28,7 +28,7 @@
     };
 @endphp
 
-<div class="flex items-center {{ $sizeClasses }} bg-surface-container-lowest rounded-2xl
+<div class="flex items-center {{ $sizeClasses }} bg-surface-container-lowest rounded-xl
             focus-within:ring-2 ring-primary transition-all shadow-inner w-full">
 
     <span class="material-symbols-outlined text-primary {{ $iconSize }} flex-shrink-0">search</span>
@@ -43,6 +43,7 @@
         @if($id) id="{{ $id }}" @endif
         placeholder="{{ $placeholder }}"
         @if($autofocus) autofocus @endif
+        {{ $attributes->except(['model', 'placeholder', 'debounce', 'id', 'size', 'autofocus', 'defer', 'wire:keydown.enter']) }}
         class="bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline w-full {{ $textSize }} font-body outline-none"
     />
 

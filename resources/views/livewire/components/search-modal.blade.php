@@ -34,7 +34,7 @@ updated(['search' => function () {
 
 $performSearch = function (SearchAnimesByNaturalLanguageAction $searchAction, CreditService $creditService) {
     $query = trim($this->search);
-    
+
     if (empty($query)) {
         $this->results = [];
         return;
@@ -58,7 +58,7 @@ $performSearch = function (SearchAnimesByNaturalLanguageAction $searchAction, Cr
     // Búsqueda semántica usando embeddings
     $animes = $searchAction->execute($query, 10);
     $this->results = $animes;
-    
+
     // Registrar interacción asíncrona
     LogUserInteractionJob::dispatch(
         user: auth()->user(),
@@ -105,7 +105,7 @@ $recentSearches = computed(function () {
 ?>
 
 <div
-    x-data="{ 
+    x-data="{
         show: $wire.entangle('showModal'),
         showUpgrade: $wire.entangle('showUpgradeModal')
     }"
@@ -129,8 +129,8 @@ $recentSearches = computed(function () {
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" @click="show = false; showUpgrade = false"></div>
 
     {{-- Modal Container --}}
-    <div 
-        x-show="!showUpgrade" 
+    <div
+        x-show="!showUpgrade"
         class="relative w-full max-w-2xl bg-surface-container-low border border-outline-variant/20 rounded-3xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.85)] overflow-hidden z-10 flex flex-col h-auto max-h-[75vh]"
     >
 
@@ -142,27 +142,27 @@ $recentSearches = computed(function () {
         {{-- Search Input Area --}}
         <div class="p-6 border-b border-outline-variant/10 shrink-0 relative z-10 flex flex-col md:flex-row items-center gap-4">
             <div class="w-full flex-grow relative" x-data="{ textLength: 0 }">
-                <x-search-input 
-                    wire:keydown.enter="performSearch" 
-                    model="search" 
-                    placeholder="Describe the anime you want to watch (e.g. 'samurai looking for revenge')..." 
-                    maxlength="150" 
-                    size="lg" 
+                <x-search-input
+                    wire:keydown.enter="performSearch"
+                    model="search"
+                    placeholder="Describe the anime you want to watch (e.g. 'samurai looking for revenge')..."
+                    maxlength="150"
+                    size="lg"
                     :autofocus="true"
                     x-on:input="textLength = $event.target.value.length"
                 >
                     <div class="flex items-center gap-2 flex-shrink-0">
-                        <span class="text-xs text-outline-variant font-bold mr-2" x-text="textLength + '/150'"></span>
+                        <span class="text-xs text-on-surface-variant font-bold mr-2" x-text="textLength + '/150'"></span>
                         <kbd class="hidden md:inline-flex items-center justify-center px-2 py-1 text-xs font-semibold text-outline-variant bg-surface-container rounded border border-outline-variant/20 uppercase tracking-widest">Esc</kbd>
                     </div>
                 </x-search-input>
             </div>
 
             {{-- Action Button --}}
-            <button wire:click="performSearch" class="flex-shrink-0 px-6 py-3.5 rounded-2xl bg-primary hover:bg-primary/90 transition-colors text-on-primary font-bold shadow-[0_0_20px_rgba(var(--color-primary),0.4)] flex items-center justify-center gap-2 border border-primary-container cursor-pointer" aria-label="AI Search">
+            <button wire:click="performSearch" class="flex-shrink-0 px-6 py-3.5 rounded-full bg-primary hover:bg-primary/90 transition-colors text-on-primary font-bold shadow-[0_0_20px_rgba(var(--color-primary),0.4)] flex items-center justify-center gap-2 border border-primary-container cursor-pointer" aria-label="AI Search">
                 <span wire:loading.remove wire:target="performSearch" class="material-symbols-outlined text-[24px]">auto_awesome</span>
                 <span wire:loading wire:target="performSearch" class="material-symbols-outlined text-[24px] animate-spin">sync</span>
-                <span class="hidden md:block">Search</span>
+                <span>Search</span>
             </button>
 
             {{-- Desktop Close Button --}}
@@ -271,8 +271,8 @@ $recentSearches = computed(function () {
     </div>
 
     {{-- Upgrade/Purchase Modal --}}
-    <div 
-        x-show="showUpgrade" 
+    <div
+        x-show="showUpgrade"
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"
