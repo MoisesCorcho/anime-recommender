@@ -179,7 +179,7 @@ $animes = computed(function () {
             <div class="col-span-2 sm:w-full md:w-auto">
                 <button
                     wire:click="applyFilters"
-                    class="w-full md:w-auto px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 transition-all text-on-primary font-bold text-sm tracking-wide shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    class="w-full md:w-auto px-8 py-3 rounded-2xl bg-primary hover:bg-primary/90 transition-all text-on-primary font-bold text-sm tracking-wide shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                 >
                     <span class="material-symbols-outlined text-[20px]">filter_alt</span>
                     Filter

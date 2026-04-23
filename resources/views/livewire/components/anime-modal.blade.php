@@ -121,7 +121,7 @@ $markAsDropped = function () {
 
     {{-- Toast Notification --}}
     <div
-        wire:poll.1500ms="$set('showToast', false)"
+        x-effect="if ($wire.showToast) { setTimeout(() => { $wire.showToast = false }, 1500) }"
         x-show="$wire.showToast"
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-2"
