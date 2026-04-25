@@ -1,11 +1,269 @@
 @import 'tailwindcss';
 
+@plugin '@tailwindcss/forms';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
 
+/*
+   Anime Recommender — Design System Tokens (Tailwind v4)
+*/
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  /* Typography */
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-headline: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-label: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  /* Core Brand Colors */
+  --color-primary: #9fa7ff;
+  --color-primary-dim: #8a95ff;
+  --color-primary-fixed: #8d98ff;
+  --color-primary-fixed-dim: #7f8af6;
+  --color-primary-container: #8d98ff;
+  --color-on-primary: #101b8b;
+  --color-on-primary-fixed: #000000;
+  --color-on-primary-fixed-variant: #0c1889;
+  --color-on-primary-container: #000a7b;
+  --color-inverse-primary: #4954bc;
+
+  /* Secondary */
+  --color-secondary: #d8e3fb;
+  --color-secondary-dim: #cad5ed;
+  --color-secondary-fixed: #d8e3fb;
+  --color-secondary-fixed-dim: #cad5ed;
+  --color-secondary-container: #3c475a;
+  --color-on-secondary: #475266;
+  --color-on-secondary-fixed: #354053;
+  --color-on-secondary-fixed-variant: #515c70;
+  --color-on-secondary-container: #c5d1e8;
+
+  /* Tertiary */
+  --color-tertiary: #ffa9e0;
+  --color-tertiary-dim: #ef84cd;
+  --color-tertiary-fixed: #ff91db;
+  --color-tertiary-fixed-dim: #ef84cd;
+  --color-tertiary-container: #ff91db;
+  --color-on-tertiary: #70175c;
+  --color-on-tertiary-fixed: #3f0032;
+  --color-on-tertiary-fixed-variant: #6f165b;
+  --color-on-tertiary-container: #640951;
+
+  /* Surface */
+  --color-surface: #070d1f;
+  --color-surface-dim: #070d1f;
+  --color-surface-bright: #222b47;
+  --color-surface-tint: #9fa7ff;
+  --color-surface-variant: #1c253e;
+  --color-surface-container-lowest: #000000;
+  --color-surface-container-low: #0c1326;
+  --color-surface-container: #11192e;
+  --color-surface-container-high: #171f36;
+  --color-surface-container-highest: #1c253e;
+  --color-on-surface: #dfe4fe;
+  --color-on-surface-variant: #a5aac2;
+  --color-inverse-surface: #faf8ff;
+  --color-inverse-on-surface: #4f5469;
+
+  /* Background */
+  --color-background: #070d1f;
+  --color-on-background: #dfe4fe;
+
+  /* Outline */
+  --color-outline: #6f758b;
+  --color-outline-variant: #41475b;
+
+  /* Error */
+  --color-error: #ff6e84;
+  --color-error-dim: #d73357;
+  --color-error-container: #a70138;
+  --color-on-error: #490013;
+  --color-on-error-container: #ffb2b9;
+
+  /* Border Radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+/*
+   Global Base Styles
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-outline-variant, currentcolor);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+}
+
+/*
+   Anime Recommender — Custom Utility Classes
+*/
+@layer utilities {
+  /* 3D Hero Perspective */
+  .hero-perspective {
+    perspective: 1200px;
+  }
+
+  /* Glass morphism panel */
+  .glass-panel {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Gradient scrim for featured card overlay */
+  .scrim-gradient {
+    background: linear-gradient(
+      to top,
+      rgba(7, 13, 31, 0.95) 0%,
+      rgba(7, 13, 31, 0.4) 60%,
+      transparent 100%
+    );
+  }
+
+  /* Primary brand gradient */
+  .primary-gradient {
+    background: linear-gradient(135deg, #9fa7ff 0%, #8d98ff 100%);
+  }
+
+  /* Hover glow for cards */
+  .card-shadow-glow:hover {
+    box-shadow: 0 0 30px rgba(159, 167, 255, 0.2);
+  }
+
+  /* 3D rotation helpers */
+  .rotate-y-12 {
+    transform: rotateY(12deg);
+  }
+  .-rotate-y-12 {
+    transform: rotateY(-12deg);
+  }
+
+  /* Font family utilities */
+  .font-headline {
+    font-family: var(--font-headline);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  /* Cover Flow — Hero Card States */
+  .hero-card-center {
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 340px; height: 480px;
+    z-index: 20; opacity: 1;
+    box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.85);
+    outline: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .hero-card-prev {
+    display: none;
+    left: 15%; top: 50%;
+    transform: translate(-50%, -50%) rotateY(12deg);
+    width: 220px; height: 340px;
+    z-index: 10; opacity: 0.4;
+    cursor: pointer;
+  }
+
+  .hero-card-next {
+    display: none;
+    left: 85%; top: 50%;
+    transform: translate(-50%, -50%) rotateY(-12deg);
+    width: 220px; height: 340px;
+    z-index: 10; opacity: 0.4;
+    cursor: pointer;
+  }
+
+  .hero-card-hidden {
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(0.75);
+    width: 220px; height: 340px;
+    z-index: 0; opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (min-width: 640px) {
+    .hero-card-prev,
+    .hero-card-next { display: block; }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-card-center { width: 420px; height: 580px; }
+    .hero-card-prev   { left: 22%; width: 280px; height: 420px; }
+    .hero-card-next   { left: 78%; width: 280px; height: 420px; }
+    .hero-card-hidden { width: 280px; height: 420px; }
+  }
+
+  /* Section header accent border */
+  .section-accent {
+    border-left: 4px solid var(--color-primary);
+    padding-left: 1rem;
+  }
+
+  /* Material Symbols — FILL variant */
+  .material-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  /* Hide scrollbar utility (used by anime modal content panel) */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Animated gradient background */
+  @keyframes auth-gradient-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .auth-bg {
+    background: linear-gradient(
+      135deg,
+      #070d1f 0%,
+      #11192e 20%,
+      #1a1040 40%,
+      #0d1535 60%,
+      #100a2e 80%,
+      #070d1f 100%
+    );
+    background-size: 300% 300%;
+    animation: auth-gradient-shift 12s ease infinite;
+  }
+
+  /* Decorative radial orbs */
+  .auth-orb-primary {
+    background: radial-gradient(ellipse at center, rgba(159, 167, 255, 0.18) 0%, transparent 65%);
+  }
+
+  .auth-orb-secondary {
+    background: radial-gradient(ellipse at center, rgba(255, 145, 219, 0.10) 0%, transparent 60%);
+  }
+
+  /* Glassmorphism auth card */
+  .auth-card {
+    background: rgba(17, 25, 46, 0.72);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(159, 167, 255, 0.12);
+    box-shadow:
+      0 32px 64px -16px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  }
 }
